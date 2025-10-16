@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindh Police Portal</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Modern Reset & Base Styles */
+        * {
+            margin: 0; 
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            width: 100%;
+            background-color: #0A2463;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 80px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Logo Styles */
+        .logo {
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Nav Links Container */
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Individual Link Styles */
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hover Animation */
+        .nav-links a:hover {
+            background-color: #C41E3A;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu Button */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            background: transparent;
+            border: none;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 0 1.5rem;
+            }
+            .nav-links a {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                height: 70px;
+                padding: 0 1rem;
+            }
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #0A2463;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 1rem 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+            .nav-links.active {
+                max-height: 500px;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a {
+                width: 90%;
+                display: block;
+                margin: 0.5rem auto;
+                padding: 0.8rem;
+                background-color: rgba(255,255,255,0.1);
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* FIR Application Styles */
+        .fir-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .fir-header {
+            background: #0A2463;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 5px solid #C41E3A;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f0f2f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #0A2463;
+            border-bottom: 3px solid #C41E3A;
+        }
+
+        .form-body {
+            padding: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+
+        .form-group {
+            flex: 1 0 200px;
+            padding: 0 10px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #0A2463;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a357a;
+        }
+
+        .btn-secondary {
+            background: #C41E3A;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #d42c47;
+        }
+
+        .required:after {
+            content: " *";
+            color: #C41E3A;
+        }
+
+        .status-check {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        /* Evidence Upload Styles */
+        .evidence-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .evidence-upload:hover {
+            border-color: #0A2463;
+        }
+
+        .evidence-upload label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .evidence-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #0A2463;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .upload-btn:hover {
+            background-color: #C41E3A;
+        }
+
+        .file-preview-container {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .file-preview {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .file-preview img, .file-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-preview .file-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #0A2463;
+            font-size: 2rem;
+            flex-direction: column;
+        }
+
+        .file-preview .file-icon small {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            text-align: center;
+            padding: 0 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .file-preview .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #C41E3A;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .file-preview .remove-btn:hover {
+            opacity: 1;
+        }
+
+        .file-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 1 0 100%;
+            }
+            .action-btns {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+            .file-preview {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        /* Footer Styles */
+        footer {
+            width: 100%;
+            background-color: #0A2463;
+            color: white;
+            padding: 25px 0 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+        
+        .footer-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 20px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section h3 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #ffffff;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: red;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .footer-section h3:hover::after {
+            width: 100%;
+            background-color:red;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-section ul li:hover {
+            transform: translateX(3px);
+        }
+        
+        .footer-section ul li a {
+            color: #E0E0E0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        
+        .footer-section ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 1px;
+            background-color: red;
+            transition: width 0.3s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #FFFFFF;
+        }
+        
+        .footer-section ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .social-icons a {
+            color: #E0E0E0;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: #FFFFFF;
+            transform: translateY(-3px) scale(1.1);
+            background:red;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.3);
+            font-size: 13px;
+            color: #B0B0B0;
+        }
+        
+        .copyright p {
+            transition: all 0.3s ease;
+        }
+        
+        .copyright:hover p {
+            color: #FFFFFF;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 15px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .social-icons {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <!-- Logo -->
+        <img src="sindh-police-pakistan-seeklogo.png" alt="Sindh Police Logo" class="logo">
+
+        <!-- Mobile Menu Button -->
+        <button class="menu-toggle" id="mobile-menu" aria-label="Toggle menu">
+            ☰
+        </button>
+
+        <!-- Nav Links -->
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="online-complain.html">Online Complain</a></li>
+            <li><a href="fir-complan.html" style="background-color: #C41E3A; transform: translateY(-2px);">FIR Complain</a></li>
+            <li><a href="CNIC.html">CNIC Complain</a></li>
+            <li><a href="CPLC.html">CPLC</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- FIR Application -->
+        <div class="fir-container">
+            <div class="fir-header">
+                <h1>SINDH POLICE FIR SYSTEM</h1>
+                <p>First Information Report - Official Portal</p>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="register-tab">Register FIR</button>
+                <button class="tab-btn" id="status-tab">Check FIR Status</button>
+                <button class="tab-btn" id="second-complaint-tab">Second Complaint</button>
+            </div>
+
+            <div class="form-body">
+                <!-- FIR Registration Form -->
+                <form id="fir-form" style="display: block;">
+                    <div class="form-section">
+                        <h2>1. Complainant Information</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name" class="required">Full Name</label>
+                                <input type="text" id="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="father-name" class="required">Father/Husband Name</label>
+                                <input type="text" id="father-name" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cnic" class="required">CNIC Number</label>
+                                <input type="text" id="cnic" placeholder="XXXXX-XXXXXXX-X" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="required">Phone Number</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address" class="required">Complete Address</label>
+                            <textarea id="address" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>2. Incident Details</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="district" class="required">District</label>
+                                <select id="district" required>
+                                    <option value="">Select District</option>
+                                    <option value="karachi">Karachi</option>
+                                    <option value="hyderabad">Hyderabad</option>
+                                    <option value="sukkur">Sukkur</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="police-station" class="required">Police Station</label>
+                                <select id="police-station" required>
+                                    <option value="">Select Police Station</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incident-date" class="required">Date of Incident</label>
+                                <input type="date" id="incident-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="incident-time" class="required">Time of Incident</label>
+                                <input type="time" id="incident-time" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="incident-type" class="required">Type of Incident</label>
+                            <select id="incident-type" required>
+                                <option value="">Select Incident Type</option>
+                                <option value="mobile-theft">Mobile Theft</option>
+                                <option value="bike-theft">Bike Theft</option>
+                                <option value="wallet-theft">Wallet Theft</option>
+                                <option value="vehicle-theft">Vehicle Theft</option>
+                                <option value="burglary">Burglary</option>
+                                <option value="assault">Assault</option>
+                                <option value="fraud">Fraud</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="incident-location" class="required">Exact Location</label>
+                            <textarea id="incident-location" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="incident-details" class="required">Detailed Description</label>
+                            <textarea id="incident-details" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Evidence Upload Section -->
+                    <div class="form-section">
+                        <h2>3. Evidence Upload</h2>
+                        <div class="form-group">
+                            <label>Upload Evidence (Photos, Videos, Documents)</label>
+                            <div class="evidence-upload">
+                                <label for="evidence-files" class="upload-btn">
+                                    <i class="fas fa-cloud-upload-alt text-white"></i>
+                                    <h6 class="text-white">Choose Files</h6>
+                                    
+                                </label>
+                                <input type="file" id="evidence-files" multiple accept="image/*, video/*, .pdf, .doc, .docx">
+                                <p class="file-info">Supported formats: JPG, PNG, MP4, PDF, DOC (Max 10GB each)</p>
+                                <div class="file-preview-container" id="file-preview-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-btns">
+                        <button type="submit" class="btn btn-primary">REGISTER FIR</button>
+                        <button type="reset" class="btn btn-secondary" id="reset-form-btn">RESET FORM</button>
+                    </div>
+                </form>
+
+                <!-- FIR Status Check -->
+                <div id="status-check" style="display: none;">
+                    <div class="form-section">
+                        <h2>Check FIR Status</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fir-number" class="required">FIR Number</label>
+                                <input type="text" id="fir-number" placeholder="Enter FIR Number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="complainant-cnic" class="required">Your CNIC</label>
+                                <input type="text" id="complainant-cnic" placeholder="XXXXX-XXXXXXX-X" required>
+                            </div>
+                        </div>
+                        <button id="check-status-btn" class="btn btn-primary">CHECK STATUS</button>
+                    </div>
+
+                    <div id="status-result" class="status-check" style="display: none;">
+                        <h3>FIR Status Details</h3>
+                        <p><strong>FIR Number:</strong> <span id="display-fir-number">FIR-12345</span></p>
+                        <p><strong>Complainant Name:</strong> <span id="display-complainant-name">Ali Ahmed</span></p>
+                        <p><strong>Police Station:</strong> <span id="display-police-station">Clifton Police Station</span></p>
+                        <p><strong>Incident Type:</strong> <span id="display-incident-type">Mobile Theft</span></p>
+                        <p><strong>Registration Date:</strong> <span id="display-reg-date">15-Oct-2023</span></p>
+                        <p><strong>Current Status:</strong> <span id="display-status" style="color: #0A2463; font-weight: bold;">Under Investigation</span></p>
+                        <p><strong>SHO Remarks:</strong> <span id="display-remarks">Investigation in progress</span></p>
+                        
+                        <!-- Evidence Display -->
+                        <div id="evidence-display" style="margin-top: 20px; display: none;">
+                            <h4>Attached Evidence</h4>
+                            <div class="file-preview-container" id="evidence-preview-container"></div>
+                        </div>
+                        
+                        <div class="stamp" style="margin-top: 20px; text-align: center;">
+                            <div style="border: 2px dashed #C41E3A; padding: 10px; display: inline-block;">
+                                <p style="color: #C41E3A; font-weight: bold;">OFFICIAL STAMP</p>
+                                <p id="display-station-name">Clifton Police Station</p>
+                                <p>Received on: <span id="display-received-date">15-Oct-2023</span></p>
+                            </div>
+                        </div>
+                        <div class="action-btns" style="margin-top: 20px;">
+                            <button id="download-fir-btn" class="btn btn-primary">DOWNLOAD FIR COPY</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Complaint Form -->
+                <div id="second-complaint" style="display: none;">
+                    <div class="form-section">
+                        <h2>Register Second Complaint</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="original-fir-number" class="required">Original FIR Number</label>
+                                <input type="text" id="original-fir-number" placeholder="Enter original FIR number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="complainant-cnic-second" class="required">Your CNIC</label>
+                                <input type="text" id="complainant-cnic-second" placeholder="XXXXX-XXXXXXX-X" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="second-complaint-details" class="required">Complaint Details</label>
+                            <textarea id="second-complaint-details" required></textarea>
+                        </div>
+                        <button id="register-second-complaint-btn" class="btn btn-primary">REGISTER SECOND COMPLAINT</button>
+                        
+                        <div id="second-complaint-result" class="status-check" style="display: none; margin-top: 20px;">
+                            <h3>Second Complaint Registered</h3>
+                            <p><strong>Original FIR Number:</strong> <span id="display-original-fir">FIR-12345</span></p>
+                            <p><strong>Second Complaint Number:</strong> <span id="display-second-complaint-number">SC-12345</span></p>
+                            <p><strong>Registration Date:</strong> <span id="display-second-complaint-date">15-Oct-2023</span></p>
+                            <p><strong>Status:</strong> <span id="display-second-complaint-status" style="color: #0A2463; font-weight: bold;">Registered</span></p>
+                            <div class="action-btns" style="margin-top: 20px;">
+                                <button id="download-second-complaint-btn" class="btn btn-primary">DOWNLOAD COMPLAINT COPY</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+<!-- footer -->
+
+ <footer>
+        <div class="footer-container">
+            <!-- Quick Links -->
+            <div class="footer-section">
+                <h2><em>Quick Links</em></h2>
+                <br>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="online-complain.html"><i class="fas fa-laptop"></i> Online Complaint</a></li>
+                    <li><a href="fir-complan.html"><i class="fas fa-gavel"></i> FIR Complaint</a></li>
+                    <li><a href="CNIC.html"><i class="fas fa-id-card"></i> CNIC Complaint</a></li>
+                    <li><a href="CPLC.html"><i class="fas fa-shield-alt"></i> CPLC</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="footer-section">
+                <h2><em>Contact Us</em></h2>
+                <br>
+                <ul>
+                    <li><a href="tel:15"><i class="fas fa-phone-alt"></i> Helpline: 15</a></li>
+                    <li><a href="mailto:complaints@sindhpolice.gov.pk">
+                        <i class="fas fa-envelope"></i> 
+                        Email: complaints@sindhpolice.gov.pk
+                    </a></li>
+                    <li><a href="https://maps.google.com?q=Central+Police+Office+Karachi" target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> 
+                        Address: Central Police Office, Karachi
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="footer-section">
+                <h2><em>Follow Us</em></h2>
+                <br>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/sindhpolicedmc"target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.twitter.com/dmcsindhpolice"target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com/policesindh"target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@sindhpolicedmc"target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="copyright">
+            <p><em>© 2025 Sindh Police Complaint Portal. All rights reserved.</em></p>
+        </div>
+    </footer>
+    
+    <script>
+        // Constants for data storage
+        const FIR_STORAGE_KEY = 'firDatabase';
+        const SECOND_COMPLAINT_STORAGE_KEY = 'secondComplaintDatabase';
+        const DATA_RETENTION_DAYS = 120; // 4 months
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+        // Police stations data
+        const policeStations = {
+            karachi: [ "Khawaja Ajmar Nagir PS", " Sir Syed PS", "North karachi PS", " Gulberg PS", " Godhra PS", "Clifton PS", "Saddar PS", "Liaquatabad PS", "Abul Hassan Isphani PS",
+  "Airport PS",
+  "Al Falah PS",
+  "Arambagh PS",
+  "Awami Colony PS",
+  "Bahadurabad PS",
+  "Baldia PS",
+  "Bin Qasim PS",
+  "Boat Basin PS",
+  "Brigade PS",
+  "Buffer Zone PS",
+  "Clifton PS",
+  "City Court PS",
+  "City Railway Colony PS",
+  "Docks PS",
+  "Defence PS",
+  "Darakhshan PS",
+  "Eidgah PS",
+  "Ferozabad PS",
+  "Frere PS",
+  "Garden PS",
+  "Gizri PS",
+  "Golimar PS",
+  "Gulbahar PS",
+  "Gulberg PS",
+  "Gulistan-e-Jauhar PS",
+  "Gulshan-e-Iqbal PS",
+  "Godhra PS",
+  "Ibrahim Hyderi PS",
+  "Ittehad Town PS",
+  "Jackson PS",
+  "Jamshed Quarter PS",
+  "Jauharabad PS",
+  "Kalakot PS",
+  "Khawaja Ajmer Nagri PS",
+  "Korangi PS",
+  "Landhi PS",
+  "Liaquatabad PS",
+  "Manghopir PS",
+  "Mochko PS",
+  "Model Colony PS",
+  "Mobina Town PS",
+  "Malir Cantt PS",
+  "Malir City PS",
+  "Mithadar PS",
+  "Nazimabad PS",
+  "New Karachi PS",
+  "New Town PS",
+  "North Karachi PS",
+  "Orangi Town PS",
+  "Paposh Nagar PS",
+  "Preedy PS",
+  "Rizvia PS",
+  "Sachal PS",
+  "Saddar PS",
+  "Saeedabad PS",
+  "Shah Faisal Colony PS",
+  "Shah Latif Town PS",
+  "Sharifabad PS",
+  "Shershah PS",
+  "SITE-A PS",
+  "SITE-B PS",
+  "Sir Syed PS",
+  "Sohrab Goth PS",
+  "Soldier Bazaar PS",
+  "Super Highway PS",
+  "Surjani Town PS",
+  "Taimuria PS",
+  "Tipu Sultan PS",
+  "Zaman Town PS" ],
+            hyderabad: ["City PS", "Latifabad PS", "Market PS",
+  "Sadar PS",
+  "Cantt PS",
+  "Qasimabad PS",
+  "Hali Road PS",
+  "Fort PS",
+  "Baldia PS",
+  "Pinyari PS",
+  "Tando Yusuf PS",
+  "Phuleli PS",
+  "Hussainabad PS"  ],
+            sukkur: ["A-Section PS", "Rohri PS" , "New Pind PS",
+  "Old Sukkur PS",
+  "Site Area PS",
+  "Abad PS",
+  "Bagarji PS",
+  "Saleh Pat PS",
+  "Saddar PS",
+  "Pano Aqil PS",
+  "Thermal Power PS",
+  "Qureshi Goth PS"],
+            larkana: ["City PS", "Rato Dero PS" , "Waleed PS",
+  "Rehmatpur PS",
+  "Bakrani PS",
+  "Darri PS",
+  "Naudero PS",
+  "Setharja PS",
+  "Taluka PS",
+  "Ali Gohar Abad PS"],
+            mirpurkhas: ["City PS", "Digri PS" , "Satellite Town PS",
+  "Town PS",
+  "Old Mirpur PS",
+  "New Mirpur PS",
+  "Tando Jan Muhammad PS",
+  "Sindhri PS",
+  "Kot Ghulam Muhammad PS",
+  "Shujaabad PS",
+  "Hussainabad PS",
+  "Jhuddo PS",
+  "Naokot PS"]
+        };
+
+        // Load databases from localStorage
+        let firDatabase = JSON.parse(localStorage.getItem(FIR_STORAGE_KEY)) || [];
+        let secondComplaintDatabase = JSON.parse(localStorage.getItem(SECOND_COMPLAINT_STORAGE_KEY)) || [];
+
+        // Track uploaded files
+        let uploadedFiles = [];
+
+        // Clean old data on load
+        cleanOldData();
+
+        // Tab switching
+        document.getElementById('register-tab').addEventListener('click', function() {
+            document.getElementById('fir-form').style.display = 'block';
+            document.getElementById('status-check').style.display = 'none';
+            document.getElementById('second-complaint').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('status-tab').classList.remove('active');
+            document.getElementById('second-complaint-tab').classList.remove('active');
+        });
+
+        document.getElementById('status-tab').addEventListener('click', function() {
+            document.getElementById('fir-form').style.display = 'none';
+            document.getElementById('status-check').style.display = 'block';
+            document.getElementById('second-complaint').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+            document.getElementById('second-complaint-tab').classList.remove('active');
+        });
+
+        document.getElementById('second-complaint-tab').addEventListener('click', function() {
+            document.getElementById('fir-form').style.display = 'none';
+            document.getElementById('status-check').style.display = 'none';
+            document.getElementById('second-complaint').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+            document.getElementById('status-tab').classList.remove('active');
+        });
+
+        // Update police stations dropdown
+        document.getElementById('district').addEventListener('change', function() {
+            const district = this.value;
+            const psSelect = document.getElementById('police-station');
+            
+            psSelect.innerHTML = '<option value="">Select Police Station</option>';
+            
+            if (district && policeStations[district]) {
+                policeStations[district].forEach(ps => {
+                    const option = document.createElement('option');
+                    option.value = ps;
+                    option.textContent = ps + " Police Station";
+                    psSelect.appendChild(option);
+                });
+            }
+        });
+
+        // File Upload Handling
+        document.getElementById('evidence-files').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('file-preview-container');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // Check file size
+                if (file.size > MAX_FILE_SIZE) {
+                    alert(`File "${file.name}" exceeds the maximum size limit of 10MB`);
+                    continue;
+                }
+                
+                // Check file type
+                const fileType = file.type;
+                if (!fileType.match('image.*') && !fileType.match('video.*') && 
+                    !fileType.match('application/pdf') && 
+                    !fileType.match('application/msword') && 
+                    !fileType.match('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+                    alert(`File "${file.name}" is not a supported format. Please upload images, videos, PDF, or Word documents.`);
+                    continue;
+                }
+                
+                uploadedFiles.push(file);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'file-preview';
+                    
+                    if (fileType.match('image.*')) {
+                        previewDiv.innerHTML = `
+                            <img src="${e.target.result}" alt="${file.name}">
+                            <button class="remove-btn" onclick="removeFile(${uploadedFiles.length - 1})">×</button>
+                        `;
+                    } else if (fileType.match('video.*')) {
+                        previewDiv.innerHTML = `
+                            <video controls>
+                                <source src="${e.target.result}" type="${fileType}">
+                            </video>
+                            <button class="remove-btn" onclick="removeFile(${uploadedFiles.length - 1})">×</button>
+                        `;
+                    } else {
+                        // For documents, show an icon
+                        const extension = file.name.split('.').pop().toUpperCase();
+                        previewDiv.innerHTML = `
+                            <div class="file-icon">
+                                <i class="fas fa-file"></i>
+                                <small>${file.name}</small>
+                            </div>
+                            <button class="remove-btn" onclick="removeFile(${uploadedFiles.length - 1})">×</button>
+                        `;
+                    }
+                    
+                    previewContainer.appendChild(previewDiv);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // Reset file input
+            this.value = '';
+        });
+
+        // Remove file function
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            updateFilePreviews();
+        }
+
+        // Update file previews
+        function updateFilePreviews() {
+            const previewContainer = document.getElementById('file-preview-container');
+            previewContainer.innerHTML = '';
+            
+            uploadedFiles.forEach((file, index) => {
+                const fileType = file.type;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'file-preview';
+                    
+                    if (fileType.match('image.*')) {
+                        previewDiv.innerHTML = `
+                            <img src="${e.target.result}" alt="${file.name}">
+                            <button class="remove-btn" onclick="removeFile(${index})">×</button>
+                        `;
+                    } else if (fileType.match('video.*')) {
+                        previewDiv.innerHTML = `
+                            <video controls>
+                                <source src="${e.target.result}" type="${fileType}">
+                            </video>
+                            <button class="remove-btn" onclick="removeFile(${index})">×</button>
+                        `;
+                    } else {
+                        const extension = file.name.split('.').pop().toUpperCase();
+                        previewDiv.innerHTML = `
+                            <div class="file-icon">
+                                <i class="fas fa-file"></i>
+                                <small>${file.name}</small>
+                            </div>
+                            <button class="remove-btn" onclick="removeFile(${index})">×</button>
+                        `;
+                    }
+                    
+                    previewContainer.appendChild(previewDiv);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Display evidence in status view
+        function displayEvidence(evidence, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (evidence && evidence.length > 0) {
+                evidence.forEach((file, index) => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-preview';
+                    fileDiv.style.margin = '5px';
+                    
+                    if (file.type.match('image.*')) {
+                        fileDiv.innerHTML = `
+                            <img src="${file.preview}" alt="${file.name}" style="width: 100px; height: 100px; object-fit: cover;">
+                            <small>${file.name}</small>
+                        `;
+                    } else if (file.type.match('video.*')) {
+                        fileDiv.innerHTML = `
+                            <video controls style="width: 100px; height: 100px; object-fit: cover;">
+                                <source src="${file.preview}" type="${file.type}">
+                            </video>
+                            <small>${file.name}</small>
+                        `;
+                    } else {
+                        fileDiv.innerHTML = `
+                            <div class="file-icon" style="width: 100px; height: 100px;">
+                                <i class="fas fa-file fa-2x"></i>
+                                <small>${file.name}</small>
+                            </div>
+                        `;
+                    }
+                    
+                    container.appendChild(fileDiv);
+                });
+            }
+        }
+
+        // FIR Registration
+        document.getElementById('fir-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Generate FIR data
+            const firData = {
+                firNumber: 'FIR-' + Math.floor(1000 + Math.random() * 9000),
+                name: document.getElementById('name').value,
+                fatherName: document.getElementById('father-name').value,
+                cnic: document.getElementById('cnic').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                district: document.getElementById('district').value,
+                policeStation: document.getElementById('police-station').value,
+                incidentDate: document.getElementById('incident-date').value,
+                incidentTime: document.getElementById('incident-time').value,
+                incidentType: document.getElementById('incident-type').value,
+                location: document.getElementById('incident-location').value,
+                details: document.getElementById('incident-details').value,
+                status: "Registered",
+                registrationDate: new Date().toISOString(),
+                receivedDate: new Date().toISOString(),
+                remarks: "FIR registered and under review",
+                investigatingOfficer: ""
+            };
+
+            // Process uploaded files
+            const evidence = [];
+            uploadedFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    evidence.push({
+                        name: file.name,
+                        type: file.type,
+                        size: (file.size / (1024 * 1024)).toFixed(1) + 'MB',
+                        preview: e.target.result
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // Add evidence to FIR data
+            firData.evidence = evidence;
+
+            // Save to database
+            firDatabase.push(firData);
+            localStorage.setItem(FIR_STORAGE_KEY, JSON.stringify(firDatabase));
+            
+            // Generate and download FIR
+            generateFirPdf(firData);
+            
+            // Show success message
+            alert(`FIR registered successfully!\nYour FIR Number: ${firData.firNumber}\nPlease note this number for future reference.`);
+            
+            // Reset form
+            this.reset();
+            uploadedFiles = [];
+            document.getElementById('file-preview-container').innerHTML = '';
+        });
+
+        // Reset form button
+        document.getElementById('reset-form-btn').addEventListener('click', function() {
+            uploadedFiles = [];
+            document.getElementById('file-preview-container').innerHTML = '';
+        });
+
+        // Check FIR Status
+        document.getElementById('check-status-btn').addEventListener('click', function() {
+            const firNumber = document.getElementById('fir-number').value;
+            const cnic = document.getElementById('complainant-cnic').value;
+            
+            if (!firNumber || !cnic) {
+                alert('Please enter both FIR Number and CNIC');
+                return;
+            }
+            
+            // Find FIR in database
+            const fir = firDatabase.find(f => f.firNumber === firNumber && f.cnic === cnic);
+            
+            if (fir) {
+                // Format dates for display
+                const regDate = new Date(fir.registrationDate);
+                const receivedDate = new Date(fir.receivedDate);
+                
+                // Display status
+                document.getElementById('display-fir-number').textContent = fir.firNumber;
+                document.getElementById('display-complainant-name').textContent = fir.name;
+                document.getElementById('display-police-station').textContent = fir.policeStation;
+                document.getElementById('display-incident-type').textContent = fir.incidentType;
+                document.getElementById('display-reg-date').textContent = regDate.toLocaleDateString('en-PK');
+                document.getElementById('display-status').textContent = fir.status;
+                document.getElementById('display-remarks').textContent = fir.remarks;
+                document.getElementById('display-station-name').textContent = fir.policeStation;
+                document.getElementById('display-received-date').textContent = receivedDate.toLocaleDateString('en-PK');
+                
+                // Set status color
+                const statusElement = document.getElementById('display-status');
+                statusElement.style.color = fir.status === "Completed" ? "#008000" : 
+                                           fir.status === "Rejected" ? "#C41E3A" : "#0A2463";
+                
+                // Display evidence if available
+                if (fir.evidence && fir.evidence.length > 0) {
+                    document.getElementById('evidence-display').style.display = 'block';
+                    displayEvidence(fir.evidence, 'evidence-preview-container');
+                } else {
+                    document.getElementById('evidence-display').style.display = 'none';
+                }
+                
+                document.getElementById('status-result').style.display = 'block';
+            } else {
+                alert('FIR not found. Please check your FIR Number and CNIC.');
+            }
+        });
+
+        // Download FIR Copy
+        document.getElementById('download-fir-btn').addEventListener('click', function() {
+            const firNumber = document.getElementById('fir-number').value;
+            const fir = firDatabase.find(f => f.firNumber === firNumber);
+            
+            if (fir) {
+                generateFirPdf(fir);
+            } else {
+                alert('FIR data not available for download');
+            }
+        });
+
+        // Register Second Complaint
+        document.getElementById('register-second-complaint-btn').addEventListener('click', function() {
+            const originalFirNumber = document.getElementById('original-fir-number').value;
+            const cnic = document.getElementById('complainant-cnic-second').value;
+            const details = document.getElementById('second-complaint-details').value;
+            
+            if (!originalFirNumber || !cnic || !details) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Check if original FIR exists
+            const originalFir = firDatabase.find(f => f.firNumber === originalFirNumber && f.cnic === cnic);
+            
+            if (!originalFir) {
+                alert('Original FIR not found. Please check FIR number and CNIC.');
+                return;
+            }
+            
+            // Create second complaint record
+            const secondComplaint = {
+                complaintNumber: 'SC-' + Math.floor(1000 + Math.random() * 9000),
+                originalFirNumber: originalFirNumber,
+                cnic: cnic,
+                details: details,
+                status: "Registered",
+                registrationDate: new Date().toISOString(),
+                originalFirData: originalFir
+            };
+            
+            // Save to database
+            secondComplaintDatabase.push(secondComplaint);
+            localStorage.setItem(SECOND_COMPLAINT_STORAGE_KEY, JSON.stringify(secondComplaintDatabase));
+            
+            // Display result
+            document.getElementById('display-original-fir').textContent = originalFirNumber;
+            document.getElementById('display-second-complaint-number').textContent = secondComplaint.complaintNumber;
+            document.getElementById('display-second-complaint-date').textContent = new Date(secondComplaint.registrationDate).toLocaleDateString('en-PK');
+            document.getElementById('display-second-complaint-status').textContent = secondComplaint.status;
+            document.getElementById('second-complaint-result').style.display = 'block';
+            
+            // Generate PDF
+            generateSecondComplaintPdf(secondComplaint);
+        });
+
+        // Download Second Complaint
+        document.getElementById('download-second-complaint-btn').addEventListener('click', function() {
+            const complaintNumber = document.getElementById('display-second-complaint-number').textContent;
+            const complaint = secondComplaintDatabase.find(c => c.complaintNumber === complaintNumber);
+            
+            if (complaint) {
+                generateSecondComplaintPdf(complaint);
+            } else {
+                alert('Complaint data not available for download');
+            }
+        });
+
+        // Generate professional FIR PDF
+        function generateFirPdf(firData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Format dates
+            const regDate = new Date(firData.registrationDate);
+            const incidentDate = new Date(firData.incidentDate);
+            
+            // Add official header
+            doc.setFontSize(16);
+            doc.setTextColor(10, 36, 99);
+            doc.text('GOVERNMENT OF SINDH', 105, 15, { align: 'center' });
+            doc.text('POLICE DEPARTMENT', 105, 22, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('FIRST INFORMATION REPORT', 105, 29, { align: 'center' });
+            
+            // Add divider line
+            doc.setDrawColor(196, 30, 58);
+            doc.setLineWidth(0.5);
+            doc.line(15, 35, 195, 35);
+            
+            // FIR details
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`FIR No: ${firData.firNumber}`, 15, 45);
+            doc.text(`Police Station: ${firData.policeStation}`, 15, 52);
+            doc.text(`Date: ${regDate.toLocaleDateString('en-PK')}`, 15, 59);
+            
+            // Complainant details section
+            doc.setFontSize(14);
+            doc.text('1. COMPLAINANT DETAILS', 15, 72);
+            doc.setFontSize(12);
+            doc.text(`Name: ${firData.name}`, 20, 80);
+            doc.text(`Father/Husband: ${firData.fatherName}`, 20, 87);
+            doc.text(`CNIC: ${firData.cnic}`, 20, 94);
+            doc.text(`Phone: ${firData.phone}`, 20, 101);
+            doc.text(`Address: ${firData.address}`, 20, 108);
+            
+            // Incident details section
+            doc.setFontSize(14);
+            doc.text('2. INCIDENT DETAILS', 15, 121);
+            doc.setFontSize(12);
+            doc.text(`District: ${firData.district}`, 20, 129);
+            doc.text(`Type: ${firData.incidentType}`, 20, 136);
+            doc.text(`Date: ${incidentDate.toLocaleDateString('en-PK')}`, 20, 143);
+            doc.text(`Time: ${firData.incidentTime}`, 20, 150);
+            doc.text(`Location: ${firData.location}`, 20, 157);
+            
+            // Incident description
+            const descriptionLines = doc.splitTextToSize(`Description: ${firData.details}`, 180);
+            doc.text(descriptionLines, 20, 164);
+            
+            // Evidence information
+            if (firData.evidence && firData.evidence.length > 0) {
+                doc.setFontSize(14);
+                doc.text('3. EVIDENCE ATTACHED', 15, 180);
+                doc.setFontSize(12);
+                let yPosition = 188;
+                firData.evidence.forEach((file, index) => {
+                    doc.text(`${index + 1}. ${file.name} (${file.size})`, 20, yPosition);
+                    yPosition += 7;
+                });
+                yPosition += 5;
+            } else {
+                doc.setFontSize(14);
+                doc.text('3. EVIDENCE ATTACHED', 15, 180);
+                doc.setFontSize(12);
+                doc.text('No evidence attached', 20, 188);
+            }
+            
+            // Status information
+            doc.setFontSize(14);
+            doc.text('4. STATUS INFORMATION', 15, 200);
+            doc.setFontSize(12);
+            doc.text(`Current Status: ${firData.status}`, 20, 208);
+            doc.text(`Remarks: ${firData.remarks}`, 20, 215);
+            
+            // Official section
+            doc.setFontSize(14);
+            doc.text('5. OFFICIAL SECTION', 15, 228);
+            doc.setFontSize(12);
+            doc.text(`Investigating Officer: ${firData.investigatingOfficer || "Not assigned yet"}`, 20, 236);
+            
+            // Add stamp area
+            doc.setTextColor(196, 30, 58);
+            doc.text('[OFFICIAL STAMP]', 140, 250);
+            doc.text(firData.policeStation, 140, 257);
+            doc.text(`Date: ${regDate.toLocaleDateString('en-PK')}`, 140, 264);
+            
+            // Add signature line
+            doc.setTextColor(0, 0, 0);
+            doc.text('SHO Signature: _________________________', 20, 264);
+            
+            // Footer note
+            doc.setFontSize(10);
+            doc.text('NOTE: This is computer generated FIR. Contact police station for original.', 105, 280, { align: 'center' });
+            
+            // Save the PDF
+            doc.save(`FIR_${firData.firNumber}.pdf`);
+        }
+
+        // Generate Second Complaint PDF
+        function generateSecondComplaintPdf(complaintData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Format dates
+            const regDate = new Date(complaintData.registrationDate);
+            const originalRegDate = new Date(complaintData.originalFirData.registrationDate);
+            
+            // Add official header
+            doc.setFontSize(16);
+            doc.setTextColor(10, 36, 99);
+            doc.text('GOVERNMENT OF SINDH', 105, 15, { align: 'center' });
+            doc.text('POLICE DEPARTMENT', 105, 22, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('SECOND COMPLAINT REGISTRATION', 105, 29, { align: 'center' });
+            
+            // Add divider line
+            doc.setDrawColor(196, 30, 58);
+            doc.setLineWidth(0.5);
+            doc.line(15, 35, 195, 35);
+            
+            // Complaint details
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Complaint No: ${complaintData.complaintNumber}`, 15, 45);
+            doc.text(`Original FIR No: ${complaintData.originalFirNumber}`, 15, 52);
+            doc.text(`Police Station: ${complaintData.originalFirData.policeStation}`, 15, 59);
+            doc.text(`Date: ${regDate.toLocaleDateString('en-PK')}`, 15, 66);
+            
+            // Original FIR details
+            doc.setFontSize(14);
+            doc.text('1. ORIGINAL FIR DETAILS', 15, 79);
+            doc.setFontSize(12);
+            doc.text(`Complainant: ${complaintData.originalFirData.name}`, 20, 87);
+            doc.text(`CNIC: ${complaintData.originalFirData.cnic}`, 20, 94);
+            doc.text(`Incident Type: ${complaintData.originalFirData.incidentType}`, 20, 101);
+            doc.text(`Original Registration Date: ${originalRegDate.toLocaleDateString('en-PK')}`, 20, 108);
+            
+            // Second complaint details
+            doc.setFontSize(14);
+            doc.text('2. SECOND COMPLAINT DETAILS', 15, 121);
+            doc.setFontSize(12);
+            doc.text(`Registration Date: ${regDate.toLocaleDateString('en-PK')}`, 20, 129);
+            
+            // Complaint description
+            const descriptionLines = doc.splitTextToSize(`Details: ${complaintData.details}`, 180);
+            doc.text(descriptionLines, 20, 136);
+            
+            // Status information
+            doc.setFontSize(14);
+            doc.text('3. STATUS INFORMATION', 15, 170);
+            doc.setFontSize(12);
+            doc.text(`Current Status: ${complaintData.status}`, 20, 178);
+            
+            // Official section
+            doc.setFontSize(14);
+            doc.text('4. OFFICIAL SECTION', 15, 191);
+            doc.setFontSize(12);
+            doc.text(`Investigating Officer: To be assigned`, 20, 199);
+            
+            // Add stamp area
+            doc.setTextColor(196, 30, 58);
+            doc.text('[OFFICIAL STAMP]', 140, 220);
+            doc.text(complaintData.originalFirData.policeStation, 140, 227);
+            doc.text(`Date: ${regDate.toLocaleDateString('en-PK')}`, 140, 234);
+            
+            // Add signature line
+            doc.setTextColor(0, 0, 0);
+            doc.text('SHO Signature: _________________________', 20, 234);
+            
+            // Footer note
+            doc.setFontSize(10);
+            doc.text('NOTE: This is computer generated document. Contact police station for original.', 105, 280, { align: 'center' });
+            
+            // Save the PDF
+            doc.save(`Second_Complaint_${complaintData.complaintNumber}.pdf`);
+        }
+
+        // Clean old data (older than 4 months)
+        function cleanOldData() {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - DATA_RETENTION_DAYS);
+            
+            // Clean FIR database
+            firDatabase = firDatabase.filter(fir => {
+                const firDate = new Date(fir.registrationDate);
+                return firDate >= cutoffDate;
+            });
+            localStorage.setItem(FIR_STORAGE_KEY, JSON.stringify(firDatabase));
+            
+            // Clean second complaint database
+            secondComplaintDatabase = secondComplaintDatabase.filter(complaint => {
+                const complaintDate = new Date(complaint.registrationDate);
+                return complaintDate >= cutoffDate;
+            });
+            localStorage.setItem(SECOND_COMPLAINT_STORAGE_KEY, JSON.stringify(secondComplaintDatabase));
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

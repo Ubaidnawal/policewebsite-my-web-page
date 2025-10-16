@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindh Police Portal</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Modern Reset & Base Styles */
+        * {
+            margin: 0; 
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            width: 100%;
+            background-color: #0A2463;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 80px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Logo Styles */
+        .logo {
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Nav Links Container */
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        /* Individual Link Styles */
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hover Animation */
+        .nav-links a:hover {
+            background-color: #C41E3A;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu Button */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 0 1.5rem;
+            }
+            .nav-links a {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                height: 70px;
+                padding: 0 1rem;
+            }
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #0A2463;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 1rem 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+            .nav-links.active {
+                max-height: 500px;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a {
+                width: 90%;
+                display: block;
+                margin: 0.5rem auto;
+                padding: 0.8rem;
+                background-color: rgba(255,255,255,0.1);
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Main Content Styles */
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* NADRA Application Form Styles */
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0A2463;
+        }
+
+        .header h1 {
+            color: #0A2463;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .required:after {
+            content: " *";
+            color: red;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #0A2463;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #C41E3A;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            font-size: 14px;
+        }
+
+        /* Validation Styles */
+        .error-message {
+            color: #C41E3A;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .char-count {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .char-count.invalid {
+            color: #C41E3A;
+        }
+        
+        input.invalid, select.invalid, textarea.invalid {
+            border-color: #C41E3A;
+        }
+
+        /* Footer Styles */
+        footer {
+            width: 100%;
+            background-color: #0A2463;
+            color: white;
+            padding: 25px 0 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+        
+        .footer-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section h3 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #ffffff;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: red;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .footer-section h3:hover::after {
+            width: 100%;
+            background-color:red;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-section ul li:hover {
+            transform: translateX(3px);
+        }
+        
+        .footer-section ul li a {
+            color: #E0E0E0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        
+        .footer-section ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 1px;
+            background-color: red;
+            transition: width 0.3s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #FFFFFF;
+        }
+        
+        .footer-section ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .social-icons a {
+            color: #E0E0E0;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: #FFFFFF;
+            transform: translateY(-3px) scale(1.1);
+            background:red;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.3);
+            font-size: 13px;
+            color: #B0B0B0;
+        }
+        
+        .copyright p {
+            transition: all 0.3s ease;
+        }
+        
+        .copyright:hover p {
+            color: #FFFFFF;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 15px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .social-icons {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <!-- Logo -->
+        <img src="sindh-police-pakistan-seeklogo.png" alt="Sindh Police Logo" class="logo">
+
+        <!-- Mobile Menu Button -->
+        <div class="menu-toggle" id="mobile-menu">
+            ☰
+        </div>
+
+        <!-- Nav Links -->
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="online-complain.html">Online Complain</a></li>
+            <li><a href="fir-complan.html">FIR Complain</a></li>
+            <li><a href="CNIC.html" style="background-color: #C41E3A; transform: translateY(-2px);">CNIC Complain</a></li>
+            <li><a href="CPLC.html">CPLC</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- NADRA Application Form -->
+        <div class="container">
+            <div class="header">
+                <h1>CNIC Complaint Application</h1>
+                <p>Government of Pakistan - NADRA</p>
+            </div>
+
+            <form id="complaintForm">
+                <div class="form-group">
+                    <label for="name" class="required">Full Name</label>
+                    <input type="text" id="name" required>
+                    <div class="error-message" id="name-error">Only letters and spaces are allowed</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fatherName" class="required">Father's Name</label>
+                    <input type="text" id="fatherName" required>
+                    <div class="error-message" id="fatherName-error">Only letters and spaces are allowed</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cnic" class="required">CNIC Number</label>
+                    <input type="text" id="cnic" placeholder="XXXXXXXXXXXXX (13 digits)" maxlength="13" required>
+                    <div class="error-message" id="cnic-error">CNIC must be exactly 13 digits</div>
+                    <div class="char-count" id="cnic-char-count">0/13 digits</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" class="required">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="03XXXXXXXXX" maxlength="11" required>
+                    <div class="error-message" id="phone-error">Phone must be exactly 11 digits and start with 03</div>
+                    <div class="char-count" id="phone-char-count">0/11 digits</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="required">Current Address</label>
+                    <textarea id="address" required></textarea>
+                    <div class="error-message" id="address-error">Please enter your complete address</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="complaintType" class="required">Complaint Type</label>
+                    <select id="complaintType" required>
+                        <option value="">Select Complaint Type</option>
+                        <option value="lost">Lost CNIC</option>
+                        <option value="stolen">Stolen CNIC</option>
+                        <option value="damaged">Damaged CNIC</option>
+                        <option value="error">Error in CNIC</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div class="error-message" id="complaintType-error">Please select a complaint type</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="complaintDetails" class="required">Complaint Details</label>
+                    <textarea id="complaintDetails" required></textarea>
+                    <div class="error-message" id="complaintDetails-error">Please provide details about your complaint</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="policeStation">Nearest Police Station</label>
+                    <input type="text" id="policeStation">
+                    <div class="error-message" id="policeStation-error">Only letters, numbers, spaces, and hyphens are allowed</div>
+                </div>
+
+                <button type="submit" class="btn">Generate Application</button>
+            </form>
+
+            <div class="note">
+                <strong>Important Note:</strong> After downloading the application, please visit your nearest police station 
+                to get the official stamp on this application. Without police verification stamp, this application 
+                will not be processed by NADRA.
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+     <footer>
+        <div class="footer-container">
+            <!-- Quick Links -->
+            <div class="footer-section">
+                <h2><em>Quick Links</em></h2>
+                <br>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="online-complain.html"><i class="fas fa-laptop"></i> Online Complaint</a></li>
+                    <li><a href="fir-complan.html"><i class="fas fa-gavel"></i> FIR Complaint</a></li>
+                    <li><a href="CNIC.html"><i class="fas fa-id-card"></i> CNIC Complaint</a></li>
+                    <li><a href="CPLC.html"><i class="fas fa-shield-alt"></i> CPLC</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="footer-section">
+                <h2><em>Contact Us</em></h2>
+                <br>
+                <ul>
+                    <li><a href="tel:15"><i class="fas fa-phone-alt"></i> Helpline: 15</a></li>
+                    <li><a href="mailto:complaints@sindhpolice.gov.pk">
+                        <i class="fas fa-envelope"></i> 
+                        Email: complaints@sindhpolice.gov.pk
+                    </a></li>
+                    <li><a href="https://maps.google.com?q=Central+Police+Office+Karachi" target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> 
+                        Address: Central Police Office, Karachi
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="footer-section">
+                <h2><em>Follow Us</em></h2>
+                <br>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/sindhpolicedmc"target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.twitter.com/dmcsindhpolice"target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com/policesindh"target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@sindhpolicedmc"target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="copyright">
+            <p><em>© 2025 Sindh Police Complaint Portal. All rights reserved.</em></p>
+        </div>
+    </footer>
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Validation functions
+        function isValidName(name) {
+            return /^[A-Za-z\s]+$/.test(name);
+        }
+
+        function isValidCnic(cnic) {
+            return /^\d{13}$/.test(cnic);
+        }
+
+        function isValidPhone(phone) {
+            return /^03\d{9}$/.test(phone);
+        }
+
+        function isValidPoliceStation(station) {
+            if (!station) return true; // Optional field
+            return /^[A-Za-z0-9\s\-]+$/.test(station);
+        }
+
+        // Input validation for name fields (only letters and spaces)
+        function setupNameValidation(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+            
+            input.addEventListener('input', function() {
+                // Remove any non-letter characters
+                this.value = this.value.replace(/[^A-Za-z\s]/g, '');
+                
+                // Validate
+                if (this.value && !isValidName(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                } else {
+                    error.style.display = 'none';
+                    this.classList.remove('invalid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidName(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                }
+            });
+        }
+
+        // Input validation for CNIC field (only numbers, exactly 13 digits)
+        function setupCnicValidation() {
+            const input = document.getElementById('cnic');
+            const error = document.getElementById('cnic-error');
+            const charCount = document.getElementById('cnic-char-count');
+            
+            input.addEventListener('input', function() {
+                // Remove any non-numeric characters
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Update character count
+                const count = this.value.length;
+                charCount.textContent = `${count}/13 digits`;
+                
+                if (count > 0 && count !== 13) {
+                    charCount.classList.add('invalid');
+                } else {
+                    charCount.classList.remove('invalid');
+                }
+                
+                // Validate
+                if (this.value && !isValidCnic(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                } else {
+                    error.style.display = 'none';
+                    this.classList.remove('invalid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidCnic(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                }
+            });
+        }
+
+        // Input validation for phone field (only numbers, exactly 11 digits starting with 03)
+        function setupPhoneValidation() {
+            const input = document.getElementById('phone');
+            const error = document.getElementById('phone-error');
+            const charCount = document.getElementById('phone-char-count');
+            
+            input.addEventListener('input', function() {
+                // Remove any non-numeric characters
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Update character count
+                const count = this.value.length;
+                charCount.textContent = `${count}/11 digits`;
+                
+                if (count > 0 && count !== 11) {
+                    charCount.classList.add('invalid');
+                } else {
+                    charCount.classList.remove('invalid');
+                }
+                
+                // Validate
+                if (this.value && !isValidPhone(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                } else {
+                    error.style.display = 'none';
+                    this.classList.remove('invalid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidPhone(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                }
+            });
+        }
+
+        // Input validation for police station field
+        function setupPoliceStationValidation() {
+            const input = document.getElementById('policeStation');
+            const error = document.getElementById('policeStation-error');
+            
+            input.addEventListener('input', function() {
+                // Remove any invalid characters
+                this.value = this.value.replace(/[^A-Za-z0-9\s\-]/g, '');
+                
+                // Validate
+                if (this.value && !isValidPoliceStation(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                } else {
+                    error.style.display = 'none';
+                    this.classList.remove('invalid');
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value && !isValidPoliceStation(this.value)) {
+                    error.style.display = 'block';
+                    this.classList.add('invalid');
+                }
+            });
+        }
+
+        // Setup all validations
+        function setupValidations() {
+            // Name fields
+            setupNameValidation('name', 'name-error');
+            setupNameValidation('fatherName', 'fatherName-error');
+            
+            // CNIC field
+            setupCnicValidation();
+            
+            // Phone field
+            setupPhoneValidation();
+            
+            // Police station field
+            setupPoliceStationValidation();
+            
+            // Required fields validation
+            const requiredFields = [
+                'address', 'complaintType', 'complaintDetails'
+            ];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                const error = document.getElementById(`${fieldId}-error`);
+                
+                if (field && error) {
+                    field.addEventListener('blur', function() {
+                        if (!this.value) {
+                            error.style.display = 'block';
+                            this.classList.add('invalid');
+                        } else {
+                            error.style.display = 'none';
+                            this.classList.remove('invalid');
+                        }
+                    });
+                }
+            });
+        }
+
+        // PDF Generation
+        const { jsPDF } = window.jspdf;
+
+        document.getElementById('complaintForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all fields
+            let isValid = true;
+            
+            // Name validation
+            if (!isValidName(document.getElementById('name').value)) {
+                document.getElementById('name-error').style.display = 'block';
+                document.getElementById('name').classList.add('invalid');
+                isValid = false;
+            }
+            
+            // Father's name validation
+            if (!isValidName(document.getElementById('fatherName').value)) {
+                document.getElementById('fatherName-error').style.display = 'block';
+                document.getElementById('fatherName').classList.add('invalid');
+                isValid = false;
+            }
+            
+            // CNIC validation
+            if (!isValidCnic(document.getElementById('cnic').value)) {
+                document.getElementById('cnic-error').style.display = 'block';
+                document.getElementById('cnic').classList.add('invalid');
+                isValid = false;
+            }
+            
+            // Phone validation
+            if (!isValidPhone(document.getElementById('phone').value)) {
+                document.getElementById('phone-error').style.display = 'block';
+                document.getElementById('phone').classList.add('invalid');
+                isValid = false;
+            }
+            
+            // Required fields validation
+            const requiredFields = [
+                'address', 'complaintType', 'complaintDetails'
+            ];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value) {
+                    document.getElementById(`${fieldId}-error`).style.display = 'block';
+                    field.classList.add('invalid');
+                    isValid = false;
+                }
+            });
+            
+            // Police station validation (if provided)
+            const policeStation = document.getElementById('policeStation').value;
+            if (policeStation && !isValidPoliceStation(policeStation)) {
+                document.getElementById('policeStation-error').style.display = 'block';
+                document.getElementById('policeStation').classList.add('invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                // Scroll to first error
+                const firstError = document.querySelector('.invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Get form values
+            const formData = {
+                name: document.getElementById('name').value,
+                fatherName: document.getElementById('fatherName').value,
+                cnic: document.getElementById('cnic').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                complaintType: document.getElementById('complaintType').value,
+                complaintDetails: document.getElementById('complaintDetails').value,
+                policeStation: document.getElementById('policeStation').value,
+                date: new Date().toLocaleDateString('en-PK')
+            };
+
+            // Generate PDF
+            generateApplicationPDF(formData);
+        });
+
+        function generateApplicationPDF(data) {
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(16);
+            doc.setTextColor(10, 36, 99);
+            doc.text('CNIC COMPLAINT APPLICATION', 105, 15, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text('Government of Pakistan - NADRA', 105, 22, { align: 'center' });
+            
+            // Divider line
+            doc.setDrawColor(196, 30, 58);
+            doc.setLineWidth(0.5);
+            doc.line(15, 30, 195, 30);
+            
+            // Application details
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            
+            let y = 40;
+            doc.text(`Date: ${data.date}`, 15, y);
+            y += 10;
+            
+            doc.text('To,', 15, y);
+            y += 7;
+            doc.text('The Director General', 15, y);
+            y += 7;
+            doc.text('NADRA Headquarters', 15, y);
+            y += 7;
+            doc.text('Islamabad', 15, y);
+            y += 15;
+            
+            doc.text('Subject: Complaint Regarding CNIC', 15, y);
+            y += 10;
+            
+            doc.text('Respected Sir,', 15, y);
+            y += 10;
+            
+            doc.text(`I, ${data.name} S/O ${data.fatherName}, holder of CNIC ${data.cnic},`, 15, y);
+            y += 7;
+            doc.text(`residing at ${data.address}, would like to register a complaint regarding`, 15, y);
+            y += 7;
+            doc.text(`my CNIC. The details are as follows:`, 15, y);
+            y += 10;
+            
+            doc.text(`Complaint Type: ${data.complaintType}`, 20, y);
+            y += 7;
+            
+            // Split complaint details into multiple lines if needed
+            const detailsLines = doc.splitTextToSize(`Details: ${data.complaintDetails}`, 180);
+            doc.text(detailsLines, 20, y);
+            y += (detailsLines.length * 7) + 5;
+            
+            doc.text('I request you to please take necessary action regarding this matter.', 15, y);
+            y += 10;
+            
+            doc.text('Thanking you in anticipation.', 15, y);
+            y += 15;
+            
+            doc.text('Yours sincerely,', 15, y);
+            y += 7;
+            doc.text(data.name, 15, y);
+            y += 7;
+            doc.text(`CNIC: ${data.cnic}`, 15, y);
+            y += 7;
+            doc.text(`Phone: ${data.phone}`, 15, y);
+            y += 15;
+            
+            // Police verification section
+            doc.setFontSize(14);
+            doc.text('FOR POLICE VERIFICATION', 105, y, { align: 'center' });
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`This is to verify that the above complaint has been registered at`, 15, y);
+            y += 7;
+            doc.text(`${data.policeStation || '___________________'} Police Station.`, 15, y);
+            y += 15;
+            
+            doc.text('Police Station Stamp:', 15, y);
+            y += 20;
+            
+            doc.text('Officer Name: ___________________', 15, y);
+            y += 7;
+            doc.text('Designation: ___________________', 15, y);
+            y += 7;
+            doc.text('Date: ___________________', 15, y);
+            y += 7;
+            doc.text('PS Seal & Signature', 15, y);
+            
+            // Save PDF
+            doc.save(`CNIC_Complaint_${data.name}.pdf`);
+            
+            alert('Application generated successfully! Please visit your nearest police station for official stamp.');
+        }
+
+        // Initialize validations
+        document.addEventListener('DOMContentLoaded', function() {
+            setupValidations();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindh Police Portal</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- bootstrap links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        /* Navbar Styles */
+        .navbar {
+            background-color: #0A2463; /* Dark Blue */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 80px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Logo Styles */
+        .logo {
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Nav Links Container */
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        /* Individual Link Styles */
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hover Animation */
+        .nav-links a:hover {
+            background-color: #C41E3A; /* Dark Red */
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu Button */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 0 1.5rem;
+            }
+            .nav-links a {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                height: 70px;
+            }
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #0A2463;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 1rem 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+            .nav-links.active {
+                max-height: 500px;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a {
+                width: 90%;
+                display: block;
+                margin: 0.5rem auto;
+                padding: 0.8rem;
+                background-color: rgba(255,255,255,0.1);
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Form Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg,#0A2463 0%, #b20321 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 1rem auto;
+            max-width: 800px;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            background-color: #0A2463;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background-color: #C41E3A;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .tab-btn:hover {
+            background-color: #E41B23;
+        }
+
+        .form-container {
+            background-color: white;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .complaint-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: #0A2463;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #0A2463;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #C41E3A;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .status-section {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            border-left: 4px solid #0A2463;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .download-btn {
+            background-color: #0A2463;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background-color: #c41e3a;
+        }
+
+        .status-registered { color: #0A2463; }
+        .status-investigation { color: #FFA500; }
+        .status-resolved { color: #008000; }
+        .status-rejected { color: #C41E3A; }
+
+        /* Complaint Type Select Styling */
+        .complaint-type-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .complaint-type-select optgroup {
+            font-weight: bold;
+            color: #0A2463;
+            padding: 5px;
+        }
+        
+        .complaint-type-select option {
+            padding: 8px;
+            margin: 2px 0;
+        }
+        
+        .complaint-type-select option:hover {
+            background-color: #0A2463;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+            
+            .tab-btn {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .action-btns {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #0A2463;
+            color: white;
+            padding: 25px 0 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 20px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section h3 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #ffffff;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: red;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .footer-section h3:hover::after {
+            width: 100%;
+            background-color:red;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-section ul li:hover {
+            transform: translateX(3px);
+        }
+        
+        .footer-section ul li a {
+            color: #E0E0E0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        
+        .footer-section ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 1px;
+            background-color: red;
+            transition: width 0.3s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #FFFFFF;
+        }
+        
+        .footer-section ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .social-icons a {
+            color: #E0E0E0;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: #FFFFFF;
+            transform: translateY(-3px) scale(1.1);
+            background:red;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.3);
+            font-size: 13px;
+            color: #B0B0B0;
+        }
+        
+        .copyright p {
+            transition: all 0.3s ease;
+        }
+        
+        .copyright:hover p {
+            color: #FFFFFF;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .social-icons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <!-- Logo -->
+        <img src="sindh-police-pakistan-seeklogo.png" alt="Sindh Police Logo" class="logo hello">
+
+        <!-- Mobile Menu Button -->
+        <div class="menu-toggle" id="mobile-menu">
+            ☰
+        </div>
+
+        <!-- Nav Links -->
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html"><em>Home</em></a></li>
+            <li><a href="about.html"><em>About</em></a></li>
+            <li><a href="online-complain.html" style="background-color: #C41E3A; transform: translateY(-2px);"><em>Online Complain</em></a></li>
+            <li><a href="fir-complan.html"><em>FIR Complain</em></a></li>
+            <li><a href="CNIC.html"><em>CNIC Complain</em></a></li>
+            <li><a href="CPLC.html"><em>CPLC</em></a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <h1><em>Sindh Police Complaint Portal</em></h1>
+        <p><em>Register And Track Your Complaints Online</em></p>
+    </div>
+    <br>
+
+    <div class="tab-buttons">
+        <button class="tab-btn active" id="reg-btn"><em>Register Complaint</em></button>
+        <button class="tab-btn" id="status-btn"><em>Check Status</em></button>
+        <button class="tab-btn" id="sho-btn"><em>SHO Action</em></button>
+    </div>
+
+    <div class="form-container">
+        <form class="complaint-form" id="register-form">
+            <h2><em>Register New Complaint</em></h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="complainant-name"><em>Complainant Name</em></label>
+                    <input type="text" id="complainant-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="father-name"><em>Father/Husband Name</em></label>
+                    <input type="text" id="father-name" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cnic"><em>CNIC Number</em></label>
+                    <input type="text" id="cnic" placeholder="XXXXX-XXXXXXX-X" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone"><em>Phone Number</em></label>
+                    <input type="tel" id="phone" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="district"><em>District</em></label>
+                    <select id="district" required onchange="updatePoliceStations()">
+                        <option value="">Select District</option>
+                        <option value="karachi">Karachi</option>
+                        <option value="hyderabad">Hyderabad</option>
+                        <option value="sukkur">Sukkur</option>
+                        <option value="larkana">Larkana</option>
+                        <option value="mirpurkhas">Mirpur Khas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="police-station"><em>Police Station</em></label>
+                    <select id="police-station" required>
+                        <option value=""><em>Select District First</em></option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="complaint-type">Complaint Type</label>
+                <select id="complaint-type" class="complaint-type-select" required>
+                    <option value="">Select Complaint Type</option>
+                    <optgroup label="Crime Related">
+                        <option value="theft">Theft/Burglary</option>
+                        <option value="robbery">Robbery/Snatching</option>
+                        <option value="fraud">Fraud/Scam</option>
+                        <option value="extortion">Extortion</option>
+                        <option value="kidnapping">Kidnapping</option>
+                    </optgroup>
+                    
+                    <optgroup label="Violence Related">
+                        <option value="assault">Physical Assault</option>
+                        <option value="domestic-violence">Domestic Violence</option>
+                        <option value="harassment">Harassment/Stalking</option>
+                        <option value="threats">Criminal Threats</option>
+                    </optgroup>
+                    
+                    <optgroup label="Property Related">
+                        <option value="property-dispute">Property Dispute</option>
+                        <option value="land-grabbing">Illegal Occupation</option>
+                        <option value="vandalism">Vandalism</option>
+                    </optgroup>
+                    
+                    <optgroup label="Cyber Crimes">
+                        <option value="cyber-bullying">Cyber Bullying</option>
+                        <option value="online-fraud">Online Fraud</option>
+                        <option value="hacking">Hacking</option>
+                    </optgroup>
+                    
+                    <optgroup label="Public Order">
+                        <option value="traffic-violation">Traffic Violation</option>
+                        <option value="public-nuisance">Public Nuisance</option>
+                        <option value="noise-pollution">Noise Pollution</option>
+                    </optgroup>
+                    
+                    <option value="missing-person">Missing Person</option>
+                    <option value="other">Other (Specify in Details)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="complaint-details"><em>Complaint Details</em></label>
+                <textarea id="complaint-details" required placeholder="Provide complete details including date, time, location, and description of incident"></textarea>
+            </div>
+            
+            <div class="action-btns">
+                <button type="submit" class="btn btn-primary"><em>Submit Complaint</em></button>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()"><em>Reset Form</em></button>
+            </div>
+        </form>
+        
+        <div class="status-section" id="status-section" style="display: none;">
+            <h2><em>Check Complaint Status</em></h2>
+            
+            <div class="form-group">
+                <label for="complaint-id"><em>Enter Complaint ID</em></label>
+                <input type="text" id="complaint-id" placeholder="e.g. SPK-2023-XXXXXX" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="status-password"><em>SHO Password</em></label>
+                <input type="password" id="status-password" required>
+            </div>
+            <br>
+            <button class="btn btn-primary" id="check-status-btn"><em>Check Status</em></button>
+            
+            <div id="status-result" style="margin-top: 1.5rem; display: none;">
+                <div class="status-header">
+                    <h3>Complaint Status</h3>
+                    <button class="download-btn" id="download-pdf"><em>Download PDF</em></button>
+                </div>
+                <p><strong>Complaint ID:</strong> <span id="display-complaint-id">SPK-2023-123456</span></p>
+                <p><strong>Complainant Name:</strong> <span id="display-name">Muhammad Ahmed</span></p>
+                <p><strong>CNIC:</strong> <span id="display-cnic">42201-1234567-9</span></p>
+                <p><strong>Phone:</strong> <span id="display-phone">0300-1234567</span></p>
+                <p><strong>Police Station:</strong> <span id="display-station">Clifton Police Station</span></p>
+                <p><strong>Complaint Type:</strong> <span id="display-type">Theft/Robbery</span></p>
+                <p><strong>Registered Date:</strong> <span id="reg-date">15-Oct-2023</span></p>
+                <p><strong>Status:</strong> <span id="status-text" class="status-investigation">Under Investigation</span></p>
+                <p><strong>Last Update:</strong> <span id="update-date">18-Oct-2023</span></p>
+                <p><strong>Investigation Officer:</strong> <span id="io-name">ASI Muhammad Ali (0345-1234567)</span></p>
+                <p><strong>SHO Remarks:</strong> <span id="sho-remarks">Case is under investigation. Evidence collection in progress.</span></p>
+            </div>
+        </div>
+        
+        <div id="sho-section" style="display: none;">
+            <h2>SHO Action Panel</h2>
+            
+            <div class="form-group">
+                <label for="sho-complaint-id">Enter Complaint ID</label>
+                <input type="text" id="sho-complaint-id" placeholder="SPK-2023-XXXXXX" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="sho-password">SHO Password</label>
+                <input type="password" id="sho-password" required>
+            </div>
+            
+            <button class="btn btn-primary" id="sho-login-btn">Access Complaint</button>
+            
+            <div id="sho-complaint-details" style="margin-top: 1.5rem; display: none;">
+                <h3>Complaint Details</h3>
+                <p><strong>Complaint ID:</strong> <span id="sho-display-id">SPK-2023-123456</span></p>
+                <p><strong>Complainant:</strong> <span id="sho-display-name">Muhammad Ahmed</span></p>
+                <p><strong>CNIC:</strong> <span id="sho-display-cnic">42201-1234567-9</span></p>
+                <p><strong>Phone:</strong> <span id="sho-display-phone">0300-1234567</span></p>
+                <p><strong>Police Station:</strong> <span id="sho-display-station">Clifton PS</span></p>
+                <p><strong>Complaint Type:</strong> <span id="sho-display-type">Theft/Robbery</span></p>
+                <p><strong>Details:</strong> <span id="sho-display-details">Complaint about motorcycle theft near Boat Basin</span></p>
+            </div>
+            
+            <div id="sho-action-panel" style="display: none; margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label for="sho-action">Update Status</label>
+                    <select id="sho-action">
+                        <option value="">Select Action</option>
+                        <option value="registered">Registered</option>
+                        <option value="investigation">Under Investigation</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="forward">Forward to Higher Authority</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sho-remarks-input">Remarks</label>
+                    <textarea id="sho-remarks-input"></textarea>
+                </div>
+                
+                <button class="btn btn-primary" id="update-status-btn">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <br>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <!-- Quick Links -->
+            <div class="footer-section">
+                <h3><em>Quick Links</em></h3>
+                <ul>
+                    <li><a href="index.html"><i class=""></i> Home</a></li>
+                    <li><a href="about.html"><i class=""></i> About</a></li>
+                    <li><a href="online-complain.html"><i class=""></i> Online Complaint</a></li>
+                    <li><a href="fir-complan.html"><i class=""></i> FIR Complaint</a></li>
+                    <li><a href="CNIC.html"><i class=""></i> CNIC Complaint</a></li>
+                    <li><a href="CPLC.html"><i class=""></i> CPLC</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="footer-section">
+                <h3><em>Contact Us</em></h3>
+                <ul>
+                    <li><a href="tel:15"><i class="fas fa-phone-alt fa-sm"></i> Helpline: 15</a></li>
+                    <li><a href="https://mail.google.com/mail/?view=cm&to=complaints@sindhpolice.gov.pk" target="_blank">
+                        <i class="fas fa-envelope fa-sm"></i> 
+                        <i class="fab fa-google fa-sm"></i> 
+                        Email: complaints@sindhpolice.gov.pk
+                    </a></li>
+                    <li><a href="https://maps.google.com?q=Central+Police+Office+Karachi" target="_blank">
+                        <i class="fas fa-map-marker-alt fa-sm"></i> 
+                        Address: Central Police Office, Karachi
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="footer-section">
+                <h3 class="ms-5"><em>Follow Us</em></h3>
+                <div class="ms-5 social-icons">
+                    <a class="" href="https://www.facebook.com/sindhpolicedmc" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a class="" href="https://www.twitter.com/dmcsindhpolice" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a class="" href="https://www.instagram.com/policesindh" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a class="" href="https://www.youtube.com/@sindhpolicedmc" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="copyright">
+            <p><em>© 2025 Sindh Police Complaint Portal. All rights reserved.</em></p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // Store complaint data in localStorage with 10-day expiration
+        const COMPLAINT_EXPIRY_DAYS = 10;
+        
+        function getComplaintsDB() {
+            const db = JSON.parse(localStorage.getItem('complaintsDB')) || { 
+                data: [], 
+                timestamp: Date.now() 
+            };
+            
+            // Clear expired complaints
+            const expiryTime = COMPLAINT_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+            if (Date.now() - db.timestamp > expiryTime) {
+                localStorage.removeItem('complaintsDB');
+                return { data: [], timestamp: Date.now() };
+            }
+            
+            return db;
+        }
+
+        function saveComplaintsDB(db) {
+            db.timestamp = Date.now();
+            localStorage.setItem('complaintsDB', JSON.stringify(db));
+        }
+
+        let complaintsDB = getComplaintsDB();
+        let currentComplaint = null;
+
+        // Initialize with demo data if empty
+        if (complaintsDB.data.length === 0) {
+            complaintsDB.data.push({
+                id: 'SPK-2023-1234',
+                name: 'Ali Khan',
+                fatherName: 'Ahmed Khan',
+                cnic: '42201-1234567-8',
+                phone: '03001234567',
+                district: 'karachi',
+                policeStation: 'Clifton PS',
+                complaintType: 'Theft/Robbery',
+                details: 'Mobile phone stolen at Sea View',
+                status: 'investigation',
+                registrationDate: new Date().toLocaleDateString('en-PK'),
+                lastUpdate: new Date().toLocaleDateString('en-PK'),
+                io: 'ASI Javed Iqbal',
+                remarks: 'CCTV footage being analyzed'
+            });
+            saveComplaintsDB(complaintsDB);
+        }
+
+        // District-wise Police Stations Data
+        const policeStations = {
+            karachi: [ "Khawaja Ajmar Nagir PS", " Sir Syed PS", "North karachi PS", " Gulberg PS", " Godhra PS", "Clifton PS", "Saddar PS", "Liaquatabad PS", "Abul Hassan Isphani PS",
+  "Airport PS",
+  "Al Falah PS",
+  "Arambagh PS",
+  "Awami Colony PS",
+  "Bahadurabad PS",
+  "Baldia PS",
+  "Bin Qasim PS",
+  "Boat Basin PS",
+  "Brigade PS",
+  "Buffer Zone PS",
+  "Clifton PS",
+  "City Court PS",
+  "City Railway Colony PS",
+  "Docks PS",
+  "Defence PS",
+  "Darakhshan PS",
+  "Eidgah PS",
+  "Ferozabad PS",
+  "Frere PS",
+  "Garden PS",
+  "Gizri PS",
+  "Golimar PS",
+  "Gulbahar PS",
+  "Gulberg PS",
+  "Gulistan-e-Jauhar PS",
+  "Gulshan-e-Iqbal PS",
+  "Godhra PS",
+  "Ibrahim Hyderi PS",
+  "Ittehad Town PS",
+  "Jackson PS",
+  "Jamshed Quarter PS",
+  "Jauharabad PS",
+  "Kalakot PS",
+  "Khawaja Ajmer Nagri PS",
+  "Korangi PS",
+  "Landhi PS",
+  "Liaquatabad PS",
+  "Manghopir PS",
+  "Mochko PS",
+  "Model Colony PS",
+  "Mobina Town PS",
+  "Malir Cantt PS",
+  "Malir City PS",
+  "Mithadar PS",
+  "Nazimabad PS",
+  "New Karachi PS",
+  "New Town PS",
+  "North Karachi PS",
+  "Orangi Town PS",
+  "Paposh Nagar PS",
+  "Preedy PS",
+  "Rizvia PS",
+  "Sachal PS",
+  "Saddar PS",
+  "Saeedabad PS",
+  "Shah Faisal Colony PS",
+  "Shah Latif Town PS",
+  "Sharifabad PS",
+  "Shershah PS",
+  "SITE-A PS",
+  "SITE-B PS",
+  "Sir Syed PS",
+  "Sohrab Goth PS",
+  "Soldier Bazaar PS",
+  "Super Highway PS",
+  "Surjani Town PS",
+  "Taimuria PS",
+  "Tipu Sultan PS",
+  "Zaman Town PS" ],
+            hyderabad: ["City PS", "Latifabad PS", "Market PS",
+  "Sadar PS",
+  "Cantt PS",
+  "Qasimabad PS",
+  "Hali Road PS",
+  "Fort PS",
+  "Baldia PS",
+  "Pinyari PS",
+  ,
+  "Tando Yusuf PS",
+  "Phuleli PS",
+  "Hussainabad PS"  ],
+            sukkur: ["A-Section PS", "Rohri PS" , "New Pind PS",
+  "Old Sukkur PS",
+  "Site Area PS",
+  "Abad PS",
+  "Bagarji PS",
+  "Saleh Pat PS",
+  "Saddar PS",
+  "Pano Aqil PS",
+  "Thermal Power PS",
+  "Qureshi Goth PS"],
+
+            larkana: ["City PS", "Rato Dero PS" , "Waleed PS",
+ 
+  "Rehmatpur PS",
+  "Bakrani PS",
+  "Darri PS",
+  "Naudero PS",
+  "Setharja PS",
+  "Taluka PS",
+  "Ali Gohar Abad PS"],
+            mirpurkhas: ["City PS", "Digri PS" , "Satellite Town PS",
+  "Town PS",
+  "Old Mirpur PS",
+  "New Mirpur PS",
+  "Tando Jan Muhammad PS",
+  "Sindhri PS",
+  "Kot Ghulam Muhammad PS",
+  "Shujaabad PS",
+  "Hussainabad PS",
+  "Jhuddo PS",
+  "Naokot PS"]
+
+        };
+
+        // Update Police Stations dropdown
+        function updatePoliceStations() {
+            const districtSelect = document.getElementById('district');
+            const policeStationSelect = document.getElementById('police-station');
+            const selectedDistrict = districtSelect.value;
+            
+            policeStationSelect.innerHTML = '<option value="">Select Police Station</option>';
+            
+            if (selectedDistrict && policeStations[selectedDistrict]) {
+                policeStations[selectedDistrict].forEach(station => {
+                    const option = document.createElement('option');
+                    option.value = station;
+                    option.textContent = station;
+                    policeStationSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Reset form properly
+        function resetForm() {
+            document.getElementById('police-station').innerHTML = '<option value="">Select District First</option>';
+        }
+
+        // Tab Switching
+        const regBtn = document.getElementById('reg-btn');
+        const statusBtn = document.getElementById('status-btn');
+        const shoBtn = document.getElementById('sho-btn');
+        
+        const registerForm = document.getElementById('register-form');
+        const statusSection = document.getElementById('status-section');
+        const shoSection = document.getElementById('sho-section');
+        
+        function resetTabs() {
+            registerForm.style.display = 'none';
+            statusSection.style.display = 'none';
+            shoSection.style.display = 'none';
+            
+            regBtn.classList.remove('active');
+            statusBtn.classList.remove('active');
+            shoBtn.classList.remove('active');
+        }
+        
+        regBtn.addEventListener('click', () => {
+            resetTabs();
+            registerForm.style.display = 'block';
+            regBtn.classList.add('active');
+        });
+        
+        statusBtn.addEventListener('click', () => {
+            resetTabs();
+            statusSection.style.display = 'block';
+            statusBtn.classList.add('active');
+            document.getElementById('complaint-id').value = '';
+            document.getElementById('status-password').value = '';
+            document.getElementById('status-result').style.display = 'none';
+        });
+        
+        shoBtn.addEventListener('click', () => {
+            resetTabs();
+            shoSection.style.display = 'block';
+            shoBtn.classList.add('active');
+            document.getElementById('sho-complaint-id').value = '';
+            document.getElementById('sho-password').value = '';
+            document.getElementById('sho-complaint-details').style.display = 'none';
+            document.getElementById('sho-action-panel').style.display = 'none';
+        });
+
+        // Register Complaint
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('complainant-name').value;
+            const fatherName = document.getElementById('father-name').value;
+            const cnic = document.getElementById('cnic').value;
+            const phone = document.getElementById('phone').value;
+            const district = document.getElementById('district').value;
+            const policeStation = document.getElementById('police-station').value;
+            const complaintType = document.getElementById('complaint-type').value;
+            const details = document.getElementById('complaint-details').value;
+            
+            // Validate required fields
+            if (!name || !fatherName || !cnic || !phone || !district || !policeStation || !complaintType || !details) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            // Generate complaint ID
+            const districtInitial = district ? district.charAt(0).toUpperCase() : 'X';
+            const year = new Date().getFullYear().toString().slice(-2);
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            const complaintId = `SP${districtInitial}-${year}-${randomNum}`;
+            
+            // Create complaint object
+            const complaint = {
+                id: complaintId,
+                name,
+                fatherName,
+                cnic,
+                phone,
+                district,
+                policeStation,
+                complaintType,
+                details,
+                status: 'registered',
+                registrationDate: new Date().toLocaleDateString('en-PK'),
+                lastUpdate: new Date().toLocaleDateString('en-PK'),
+                io: '',
+                remarks: 'Complaint registered and awaiting processing'
+            };
+            
+            // Store in database
+            complaintsDB.data.push(complaint);
+            saveComplaintsDB(complaintsDB);
+            
+            // Show success message
+            alert(`Complaint registered successfully!\nYour Complaint ID: ${complaintId}\nThis will be stored for ${COMPLAINT_EXPIRY_DAYS} days.`);
+            
+            // Reset form
+            this.reset();
+            resetForm();
+        });
+
+        // Check Status
+        document.getElementById('check-status-btn').addEventListener('click', function() {
+            const complaintId = document.getElementById('complaint-id').value;
+            const password = document.getElementById('status-password').value;
+            
+            if (!complaintId || !password) {
+                alert('Please enter both Complaint ID and SHO Password');
+                return;
+            }
+            
+            // Verify password
+            if (password !== 'sho123') {
+                alert('Invalid SHO Password');
+                return;
+            }
+            
+            // Refresh database
+            complaintsDB = getComplaintsDB();
+            
+            // Find complaint
+            currentComplaint = complaintsDB.data.find(c => c.id === complaintId);
+            
+            if (currentComplaint) {
+                // Update display
+                document.getElementById('display-complaint-id').textContent = currentComplaint.id;
+                document.getElementById('display-name').textContent = currentComplaint.name;
+                document.getElementById('display-cnic').textContent = currentComplaint.cnic;
+                document.getElementById('display-phone').textContent = currentComplaint.phone;
+                document.getElementById('display-station').textContent = currentComplaint.policeStation;
+                document.getElementById('display-type').textContent = currentComplaint.complaintType;
+                document.getElementById('reg-date').textContent = currentComplaint.registrationDate;
+                document.getElementById('update-date').textContent = currentComplaint.lastUpdate;
+                document.getElementById('io-name').textContent = currentComplaint.io || 'Not assigned yet';
+                document.getElementById('sho-remarks').textContent = currentComplaint.remarks;
+                
+                // Set status
+                const statusText = document.getElementById('status-text');
+                statusText.textContent = currentComplaint.status.charAt(0).toUpperCase() + currentComplaint.status.slice(1);
+                statusText.className = `status-${currentComplaint.status.replace(/ /g, '-')}`;
+                
+                document.getElementById('status-result').style.display = 'block';
+            } else {
+                alert(`Complaint not found. Possible reasons:\n1. Incorrect Complaint ID\n2. Complaint expired (older than ${COMPLAINT_EXPIRY_DAYS} days)`);
+            }
+        });
+
+        // SHO Login
+        document.getElementById('sho-login-btn').addEventListener('click', function() {
+            const complaintId = document.getElementById('sho-complaint-id').value;
+            const password = document.getElementById('sho-password').value;
+            
+            if (!complaintId || !password) {
+                alert('Please enter both Complaint ID and SHO Password');
+                return;
+            }
+            
+            if (password !== 'sho123') {
+                alert('Invalid SHO Password');
+                return;
+            }
+            
+            // Refresh database
+            complaintsDB = getComplaintsDB();
+            
+            currentComplaint = complaintsDB.data.find(c => c.id === complaintId);
+            
+            if (currentComplaint) {
+                document.getElementById('sho-complaint-details').style.display = 'block';
+                document.getElementById('sho-action-panel').style.display = 'block';
+                document.getElementById('sho-display-id').textContent = currentComplaint.id;
+                document.getElementById('sho-display-name').textContent = currentComplaint.name;
+                document.getElementById('sho-display-cnic').textContent = currentComplaint.cnic;
+                document.getElementById('sho-display-phone').textContent = currentComplaint.phone;
+                document.getElementById('sho-display-station').textContent = currentComplaint.policeStation;
+                document.getElementById('sho-display-type').textContent = currentComplaint.complaintType;
+                document.getElementById('sho-display-details').textContent = currentComplaint.details;
+                document.getElementById('sho-action').value = currentComplaint.status;
+            } else {
+                alert('Complaint not found');
+            }
+        });
+
+        // Update Status
+        document.getElementById('update-status-btn').addEventListener('click', function() {
+            const newStatus = document.getElementById('sho-action').value;
+            const remarks = document.getElementById('sho-remarks-input').value;
+            
+            if (!newStatus) {
+                alert('Please select an action');
+                return;
+            }
+            
+            if (currentComplaint) {
+                currentComplaint.status = newStatus;
+                currentComplaint.lastUpdate = new Date().toLocaleDateString('en-PK');
+                currentComplaint.remarks = remarks;
+                saveComplaintsDB(complaintsDB);
+                alert('Status updated successfully');
+            }
+        });
+
+        // PDF Download
+        document.getElementById('download-pdf').addEventListener('click', function() {
+            if (!currentComplaint) {
+                alert('No complaint selected');
+                return;
+            }
+            
+            // Create a new jsPDF instance
+            const doc = new jsPDF();
+            
+            // Add Sindh Police logo (you would need to add the actual image)
+            // doc.addImage('sindh-police-logo.png', 'PNG', 10, 10, 30, 30);
+            
+            // Set document properties
+            doc.setProperties({
+                title: `FIR Report - ${currentComplaint.id}`,
+                subject: 'First Information Report',
+                author: 'Sindh Police',
+                keywords: 'FIR, Complaint, Sindh Police',
+                creator: 'Sindh Police Complaint Portal'
+            });
+            
+            // Add header
+            doc.setFontSize(16);
+            doc.setTextColor(10, 36, 99); // Sindh Police blue
+            doc.text('SINDH POLICE', 105, 20, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('FIRST INFORMATION REPORT', 105, 28, { align: 'center' });
+            
+            // Add line separator
+            doc.setDrawColor(196, 30, 58); // Sindh Police red
+            doc.setLineWidth(0.5);
+            doc.line(20, 32, 190, 32);
+            
+            // Add complaint details
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            
+            let yPosition = 40;
+            
+            // Complaint ID and Date
+            doc.setFont(undefined, 'bold');
+            doc.text('Complaint ID:', 20, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.id, 60, yPosition);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Date:', 140, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(new Date().toLocaleDateString('en-PK'), 160, yPosition);
+            
+            yPosition += 10;
+            
+            // Complainant Details
+            doc.setFont(undefined, 'bold');
+            doc.text('Complainant Details:', 20, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Name:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.name, 50, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Father/Husband:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.fatherName, 70, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('CNIC:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.cnic, 50, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Phone:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.phone, 50, yPosition);
+            yPosition += 12;
+            
+            // Police Station and District
+            doc.setFont(undefined, 'bold');
+            doc.text('Police Station:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.policeStation, 70, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('District:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.district.charAt(0).toUpperCase() + currentComplaint.district.slice(1), 50, yPosition);
+            yPosition += 12;
+            
+            // Complaint Type and Status
+            doc.setFont(undefined, 'bold');
+            doc.text('Complaint Type:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.complaintType, 70, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Status:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.status.charAt(0).toUpperCase() + currentComplaint.status.slice(1), 50, yPosition);
+            yPosition += 12;
+            
+            // Complaint Details
+            doc.setFont(undefined, 'bold');
+            doc.text('Details:', 20, yPosition);
+            yPosition += 8;
+            
+            const detailsLines = doc.splitTextToSize(currentComplaint.details, 170);
+            doc.setFont(undefined, 'normal');
+            doc.text(detailsLines, 30, yPosition);
+            yPosition += (detailsLines.length * 7) + 8;
+            
+            // Investigation Officer and Remarks
+            doc.setFont(undefined, 'bold');
+            doc.text('Investigation Officer:', 30, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(currentComplaint.io || 'Not assigned', 80, yPosition);
+            yPosition += 8;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('SHO Remarks:', 30, yPosition);
+            yPosition += 8;
+            
+            const remarksLines = doc.splitTextToSize(currentComplaint.remarks || 'N/A', 170);
+            doc.setFont(undefined, 'normal');
+            doc.text(remarksLines, 40, yPosition);
+            yPosition += (remarksLines.length * 7) + 12;
+            
+            // Footer
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('This is a computer generated FIR. For official verification, please contact the concerned police station.', 105, yPosition, { align: 'center' });
+            yPosition += 8;
+            doc.text('© 2025 Sindh Police Complaint Portal', 105, yPosition, { align: 'center' });
+            
+            // Save the PDF
+            doc.save(`FIR_${currentComplaint.id}.pdf`);
+        });
+
+        // Initialize with register form
+        registerForm.style.display = 'block';
+        
+        // Mobile Menu Toggle
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindh Police Portal</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- bootstrap link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+
+    <style>
+        /* Modern Reset & Base Styles */
+        * {
+            margin: 0; 
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            width: 100%;
+            background-color: #0A2463;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 80px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Logo Styles */
+        .logo {
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Nav Links Container */
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Individual Link Styles */
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hover Animation */
+        .nav-links a:hover {
+            background-color: #C41E3A;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu Button */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            color: white;
+            font-size: 1.5rem;
+            background: transparent;
+            border: none;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 0 1.5rem;
+            }
+            .nav-links a {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                height: 70px;
+                padding: 0 1rem;
+            }
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: #0A2463;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 1rem 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+            .nav-links.active {
+                max-height: 500px;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a {
+                width: 90%;
+                display: block;
+                margin: 0.5rem auto;
+                padding: 0.8rem;
+                background-color: rgba(255,255,255,0.1);
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* CPLC Application Styles */
+        .cplc-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cplc-header {
+            background: #0A2463;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid #C41E3A;
+        }
+
+        .cplc-header img {
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f0f2f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #0A2463;
+            border-bottom: 3px solid #C41E3A;
+        }
+
+        .form-body {
+            padding: 25px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .form-section h2 {
+            color: #0A2463;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-left: 4px solid #C41E3A;
+            padding-left: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px 15px;
+        }
+
+        .form-group {
+            flex: 1 0 200px;
+            padding: 0 10px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .required:after {
+            content: " *";
+            color: #C41E3A;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #0A2463;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a357a;
+        }
+
+        .btn-secondary {
+            background: #C41E3A;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #d42c47;
+        }
+
+        .status-check {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .complaint-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .complaint-type {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .complaint-type:hover {
+            border-color: #0A2463;
+        }
+
+        .complaint-type.selected {
+            background: #0A2463;
+            color: white;
+            border-color: #0A2463;
+        }
+
+        .status-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 1 0 100%;
+            }
+            .action-btns {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+            .complaint-types {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Footer Styles */
+        footer {
+            width: 100%;
+            background-color: #0A2463;
+            color: white;
+            padding: 25px 0 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+        
+        .footer-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 20px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section h3 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #ffffff;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background-color: red;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .footer-section h3:hover::after {
+            width: 100%;
+            background-color:red;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .footer-section ul li:hover {
+            transform: translateX(3px);
+        }
+        
+        .footer-section ul li a {
+            color: #E0E0E0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        
+        .footer-section ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 1px;
+            background-color: red;
+            transition: width 0.3s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #FFFFFF;
+        }
+        
+        .footer-section ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .social-icons a {
+            color: #E0E0E0;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: #FFFFFF;
+            transform: translateY(-3px) scale(1.1);
+            background:red;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.3);
+            font-size: 13px;
+            color: #B0B0B0;
+        }
+        
+        .copyright p {
+            transition: all 0.3s ease;
+        }
+        
+        .copyright:hover p {
+            color: #FFFFFF;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 15px;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+            
+            .social-icons {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <!-- Logo -->
+        <img src="sindh-police-pakistan-seeklogo.png" alt="Sindh Police Logo" class="logo">
+
+        <!-- Mobile Menu Button -->
+        <button class="menu-toggle" id="mobile-menu" aria-label="Toggle menu">
+            ☰
+        </button>
+
+        <!-- Nav Links -->
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="online-complain.html">Online Complain</a></li>
+            <li><a href="fir-complan.html">FIR Complain</a></li>
+            <li><a href="CNIC.html">CNIC Complain</a></li>
+            <li><a href="CPLC.html"style="background-color: #C41E3A; 
+            transform: translateY(-2px);">CPLC</a></li>
+                <li><a href="contact.html">Contact </a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- CPLC Application -->
+        <div class="cplc-container">
+            <div class="cplc-header">
+                <img src="unnamed.webp" alt="CPLC Logo">
+                <h1>CITIZENS POLICE LIAISON COMMITTEE</h1>
+                <p>Complaint Registration System - Sindh Police</p>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="register-tab">Register Complaint</button>
+                <button class="tab-btn" id="status-tab">Check Status</button>
+            </div>
+
+            <div class="form-body">
+                <!-- Complaint Registration Form -->
+                <form id="cplc-form" style="display: block;">
+                    <div class="form-section">
+                        <h2>1. Complainant Information</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name" class="required">Full Name</label>
+                                <input type="text" id="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="father-name">Father/Husband Name</label>
+                                <input type="text" id="father-name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cnic" class="required">CNIC Number</label>
+                                <input type="text" id="cnic" placeholder="XXXXX-XXXXXXX-X" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="required">Phone Number</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address" class="required">Complete Address</label>
+                            <textarea id="address" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>2. Complaint Details</h2>
+                        <div class="form-group">
+                            <label class="required">Complaint Type</label>
+
+
+<div class="form-group">
+    <label><em>CPLC Complaint Types (Select Multiple)</em></label>
+    <div class="complaint-types">
+        <!-- Crime Related -->
+        <div class="complaint-type">
+            <input type="checkbox" id="theft" name="cplc-complaint-types" value="Theft">
+            <label for="theft">Theft/Burglary</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="robbery" name="cplc-complaint-types" value="Robbery">
+            <label for="robbery">Robbery</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="fraud" name="cplc-complaint-types" value="Fraud">
+            <label for="fraud">Fraud/Scam</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="extortion" name="cplc-complaint-types" value="Extortion">
+            <label for="extortion">Extortion</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="kidnapping" name="cplc-complaint-types" value="Kidnapping">
+            <label for="kidnapping">Kidnapping</label>
+        </div>
+        
+        <!-- Violence Related -->
+        <div class="complaint-type">
+            <input type="checkbox" id="assault" name="cplc-complaint-types" value="Assault">
+            <label for="assault">Assault</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="domestic-violence" name="cplc-complaint-types" value="Domestic Violence">
+            <label for="domestic-violence">Domestic Violence</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="harassment" name="cplc-complaint-types" value="Harassment">
+            <label for="harassment">Harassment</label>
+        </div>
+        
+        <!-- Property Related -->
+        <div class="complaint-type">
+            <input type="checkbox" id="property-dispute" name="cplc-complaint-types" value="Property Dispute">
+            <label for="property-dispute">Property Dispute</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="land-grabbing" name="cplc-complaint-types" value="Land Grabbing">
+            <label for="land-grabbing">Land Grabbing</label>
+        </div>
+        
+        <!-- Cyber Crimes -->
+        <div class="complaint-type">
+            <input type="checkbox" id="cyber-bullying" name="cplc-complaint-types" value="Cyber Bullying">
+            <label for="cyber-bullying">Cyber Bullying</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="online-fraud" name="cplc-complaint-types" value="Online Fraud">
+            <label for="online-fraud">Online Fraud</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="hacking" name="cplc-complaint-types" value="Hacking">
+            <label for="hacking">Hacking</label>
+        </div>
+        
+        <!-- Traffic & Public Nuisance -->
+        <div class="complaint-type">
+            <input type="checkbox" id="traffic-violation" name="cplc-complaint-types" value="Traffic Violation">
+            <label for="traffic-violation">Traffic Violation</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="public-nuisance" name="cplc-complaint-types" value="Public Nuisance">
+            <label for="public-nuisance">Public Nuisance</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="noise-pollution" name="cplc-complaint-types" value="Noise Pollution">
+            <label for="noise-pollution">Noise Pollution</label>
+        </div>
+        
+        <!-- Police Related -->
+        <div class="complaint-type">
+            <input type="checkbox" id="police-misconduct" name="cplc-complaint-types" value="Police Misconduct">
+            <label for="police-misconduct">Police Misconduct</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="corruption" name="cplc-complaint-types" value="Corruption">
+            <label for="corruption">Corruption</label>
+        </div>
+        
+        <!-- Other Important Categories -->
+        <div class="complaint-type">
+            <input type="checkbox" id="missing-person" name="cplc-complaint-types" value="Missing Person">
+            <label for="missing-person">Missing Person</label>
+        </div>
+        <div class="complaint-type">
+            <input type="checkbox" id="other" name="cplc-complaint-types" value="Other">
+            <label for="other">Other (Specify in Details)</label>
+        </div>
+    </div>
+</div>
+
+                            <input type="hidden" id="complaint-type" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="district" class="required">District</label>
+                                <select id="district" required>
+                                    <option value="">Select District</option>
+                                    <option value="karachi">Karachi</option>
+                                    <option value="hyderabad">Hyderabad</option>
+                                    <option value="sukkur">Sukkur</option>
+                                    <option value="larkana">Larkana</option>
+                                    <option value="mirpurkhas">Mirpur Khas</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="police-station">Police Station (if known)</label>
+                                <input type="text" id="police-station">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incident-date" class="required">Date of Incident</label>
+                                <input type="date" id="incident-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="incident-time">Time of Incident</label>
+                                <input type="time" id="incident-time">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="incident-location" class="required">Exact Location</label>
+                            <textarea id="incident-location" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="complaint-details" class="required">Detailed Description</label>
+                            <textarea id="complaint-details" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="evidence">Evidence Details (Documents, Photos, etc.)</label>
+                            <textarea id="evidence" placeholder="Describe any evidence you have"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>3. Suspect Information (if known)</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="suspect-name">Suspect Name</label>
+                                <input type="text" id="suspect-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="suspect-cnic">Suspect CNIC</label>
+                                <input type="text" id="suspect-cnic" placeholder="XXXXX-XXXXXXX-X">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="suspect-address">Suspect Address</label>
+                            <textarea id="suspect-address"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="suspect-details">Other Identifying Details</label>
+                            <textarea id="suspect-details" placeholder="Physical description, vehicle details, etc."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="action-btns">
+                        <button type="submit" class="btn btn-primary">SUBMIT COMPLAINT</button>
+                        <button type="reset" class="btn btn-secondary">RESET FORM</button>
+                    </div>
+                </form>
+
+                <!-- Complaint Status Check -->
+                <div id="status-check" style="display: none;">
+                    <div class="form-section">
+                        <h2>Check Complaint Status</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="check-complaint-number" class="required">Complaint Number</label>
+                                <input type="text" id="check-complaint-number" placeholder="CPLC-12345" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="check-cnic" class="required">Your CNIC</label>
+                                <input type="text" id="check-cnic" placeholder="XXXXX-XXXXXXX-X" required>
+                            </div>
+                        </div>
+                        <button id="check-status-btn" class="btn btn-primary">CHECK STATUS</button>
+                    </div>
+
+                    <div id="status-result" class="status-check" style="display: none;">
+                        <h3>Complaint Status Details</h3>
+                        <p><strong>Complaint Number:</strong> <span id="display-complaint-number">CPLC-12345</span></p>
+                        <p><strong>Complainant Name:</strong> <span id="display-complainant-name">Ali Ahmed</span></p>
+                        <p><strong>Complaint Type:</strong> <span id="display-complaint-type">Crime Report</span></p>
+                        <p><strong>Registration Date:</strong> <span id="display-reg-date">15-Jul-2023</span></p>
+                        <p><strong>Current Status:</strong> <span id="display-status" style="color: #0A2463; font-weight: bold;">Under Review</span></p>
+                        
+                        <h4 style="margin-top: 20px;">Status Updates</h4>
+                        <div id="status-updates">
+                            <!-- Status updates will be added here dynamically -->
+                        </div>
+                        
+                        <div class="action-btns" style="margin-top: 20px;">
+                            <button id="download-complaint-btn" class="btn btn-primary">DOWNLOAD COMPLAINT COPY</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+<!-- footer -->
+ <footer>
+        <div class="footer-container">
+            <!-- Quick Links -->
+            <div class="footer-section">
+                <h2><em>Quick Links</em></h2>
+                <br>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="online-complain.html"><i class="fas fa-laptop"></i> Online Complaint</a></li>
+                    <li><a href="fir-complan.html"><i class="fas fa-gavel"></i> FIR Complaint</a></li>
+                    <li><a href="CNIC.html"><i class="fas fa-id-card"></i> CNIC Complaint</a></li>
+                    <li><a href="CPLC.html"><i class="fas fa-shield-alt"></i> CPLC</a></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="footer-section">
+                <h2><em>Contact Us</em></h2>
+                <br>
+                <ul>
+                    <li><a href="tel:15"><i class="fas fa-phone-alt"></i> Helpline: 15</a></li>
+                    <li><a href="mailto:complaints@sindhpolice.gov.pk">
+                        <i class="fas fa-envelope"></i> 
+                        Email: complaints@sindhpolice.gov.pk
+                    </a></li>
+                    <li><a href="https://maps.google.com?q=Central+Police+Office+Karachi" target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> 
+                        Address: Central Police Office, Karachi
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="footer-section">
+                <h2><em>Follow Us</em></h2>
+                <br>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/sindhpolicedmc"target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.twitter.com/dmcsindhpolice"target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.instagram.com/policesindh"target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@sindhpolicedmc"target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="copyright">
+            <p><em>© 2025 Sindh Police Complaint Portal. All rights reserved.</em></p>
+        </div>
+    </footer>
+    <script>
+        // Constants for data storage
+        const CPLC_STORAGE_KEY = 'cplcComplaints';
+        const DATA_RETENTION_DAYS = 120; // 4 months
+
+        // Load database from localStorage
+        let cplcComplaints = JSON.parse(localStorage.getItem(CPLC_STORAGE_KEY)) || [];
+
+        // Clean old data on load
+        cleanOldData();
+
+        // Tab switching
+        document.getElementById('register-tab').addEventListener('click', function() {
+            document.getElementById('cplc-form').style.display = 'block';
+            document.getElementById('status-check').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('status-tab').classList.remove('active');
+        });
+
+        document.getElementById('status-tab').addEventListener('click', function() {
+            document.getElementById('cplc-form').style.display = 'none';
+            document.getElementById('status-check').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('register-tab').classList.remove('active');
+        });
+
+        // Complaint type selection
+        document.querySelectorAll('.complaint-type').forEach(type => {
+            type.addEventListener('click', function() {
+                document.querySelectorAll('.complaint-type').forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('complaint-type').value = this.dataset.type;
+            });
+        });
+
+        // Form submission
+        document.getElementById('cplc-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Generate complaint data
+            const complaintData = {
+                complaintNumber: 'CPLC-' + Math.floor(10000 + Math.random() * 90000),
+                name: document.getElementById('name').value,
+                fatherName: document.getElementById('father-name').value,
+                cnic: document.getElementById('cnic').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                gender: document.getElementById('gender').value,
+                address: document.getElementById('address').value,
+                complaintType: document.getElementById('complaint-type').value,
+                district: document.getElementById('district').value,
+                policeStation: document.getElementById('police-station').value,
+                incidentDate: document.getElementById('incident-date').value,
+                incidentTime: document.getElementById('incident-time').value,
+                location: document.getElementById('incident-location').value,
+                details: document.getElementById('complaint-details').value,
+                evidence: document.getElementById('evidence').value,
+                suspectName: document.getElementById('suspect-name').value,
+                suspectCnic: document.getElementById('suspect-cnic').value,
+                suspectAddress: document.getElementById('suspect-address').value,
+                suspectDetails: document.getElementById('suspect-details').value,
+                status: "Received",
+                registrationDate: new Date().toISOString(),
+                statusUpdates: [
+                    {
+                        status: "Received",
+                        date: new Date().toISOString(),
+                        remarks: "Complaint received and under review"
+                    }
+                ]
+            };
+
+            // Save to database
+            cplcComplaints.push(complaintData);
+            localStorage.setItem(CPLC_STORAGE_KEY, JSON.stringify(cplcComplaints));
+            
+            // Generate PDF
+            generateCplcPdf(complaintData);
+            
+            // Show success message
+            alert(`Complaint registered successfully!\nYour Complaint Number: ${complaintData.complaintNumber}\nPlease note this number for future reference.`);
+            
+            // Reset form
+            this.reset();
+            document.querySelectorAll('.complaint-type').forEach(t => t.classList.remove('selected'));
+            document.getElementById('complaint-type').value = '';
+        });
+
+        // Check Status
+        document.getElementById('check-status-btn').addEventListener('click', function() {
+            const complaintNumber = document.getElementById('check-complaint-number').value;
+            const cnic = document.getElementById('check-cnic').value;
+            
+            if (!complaintNumber || !cnic) {
+                alert('Please enter both Complaint Number and CNIC');
+                return;
+            }
+            
+            // Find complaint in database
+            const complaint = cplcComplaints.find(c => 
+                c.complaintNumber === complaintNumber && 
+                c.cnic === cnic
+            );
+            
+            if (complaint) {
+                // Format dates
+                const regDate = new Date(complaint.registrationDate);
+                
+                // Display status
+                document.getElementById('display-complaint-number').textContent = complaint.complaintNumber;
+                document.getElementById('display-complainant-name').textContent = complaint.name;
+                document.getElementById('display-complaint-type').textContent = formatComplaintType(complaint.complaintType);
+                document.getElementById('display-reg-date').textContent = regDate.toLocaleDateString('en-PK');
+                document.getElementById('display-status').textContent = complaint.status;
+                
+                // Set status color
+                const statusElement = document.getElementById('display-status');
+                statusElement.style.color = complaint.status === "Resolved" ? "#008000" : 
+                                           complaint.status === "Rejected" ? "#C41E3A" : "#0A2463";
+                
+                // Display status updates
+                const updatesContainer = document.getElementById('status-updates');
+                updatesContainer.innerHTML = '';
+                
+                complaint.statusUpdates.forEach((update, index) => {
+                    const updateDate = new Date(update.date);
+                    const updateElement = document.createElement('div');
+                    updateElement.className = 'status-item';
+                    updateElement.innerHTML = `
+                        <p><strong>${update.status}</strong> <span class="status-date">${updateDate.toLocaleDateString('en-PK')}</span></p>
+                        <p>${update.remarks}</p>
+                    `;
+                    updatesContainer.appendChild(updateElement);
+                });
+                
+                document.getElementById('status-result').style.display = 'block';
+                
+                // Scroll to result
+                document.getElementById('status-result').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Complaint not found. Please check your Complaint Number and CNIC.');
+            }
+        });
+
+        // Download Complaint
+        document.getElementById('download-complaint-btn').addEventListener('click', function() {
+            const complaintNumber = document.getElementById('display-complaint-number').textContent;
+            const cnic = document.getElementById('check-cnic').value;
+            const complaint = cplcComplaints.find(c => 
+                c.complaintNumber === complaintNumber && 
+                c.cnic === cnic
+            );
+            
+            if (complaint) {
+                generateCplcPdf(complaint);
+            } else {
+                alert('Complaint data not available for download');
+            }
+        });
+
+        // Generate CPLC Complaint PDF
+        function generateCplcPdf(complaintData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Format dates
+            const regDate = new Date(complaintData.registrationDate);
+            const incidentDate = new Date(complaintData.incidentDate);
+            
+            // Add official header
+            doc.setFontSize(16);
+            doc.setTextColor(10, 36, 99);
+            doc.text('CITIZENS POLICE LIAISON COMMITTEE', 105, 15, { align: 'center' });
+            doc.text('SINDH POLICE COMPLAINT FORM', 105, 22, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text('Government of Sindh - Police Department', 105, 29, { align: 'center' });
+            
+            // Add divider line
+            doc.setDrawColor(196, 30, 58);
+            doc.setLineWidth(0.5);
+            doc.line(15, 35, 195, 35);
+            
+            // Complaint details
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Complaint No: ${complaintData.complaintNumber}`, 15, 45);
+            doc.text(`Date Registered: ${regDate.toLocaleDateString('en-PK')}`, 15, 52);
+            doc.text(`Status: ${complaintData.status}`, 15, 59);
+            
+            // Complainant details section
+            doc.setFontSize(14);
+            doc.text('1. COMPLAINANT INFORMATION', 15, 72);
+            doc.setFontSize(12);
+            doc.text(`Name: ${complaintData.name}`, 20, 80);
+            doc.text(`Father/Husband: ${complaintData.fatherName || 'N/A'}`, 20, 87);
+            doc.text(`CNIC: ${complaintData.cnic}`, 20, 94);
+            doc.text(`Phone: ${complaintData.phone}`, 20, 101);
+            doc.text(`Email: ${complaintData.email || 'N/A'}`, 20, 108);
+            doc.text(`Address: ${complaintData.address}`, 20, 115);
+            
+            // Complaint details section
+            doc.setFontSize(14);
+            doc.text('2. COMPLAINT DETAILS', 15, 128);
+            doc.setFontSize(12);
+            doc.text(`Type: ${formatComplaintType(complaintData.complaintType)}`, 20, 136);
+            doc.text(`District: ${complaintData.district}`, 20, 143);
+            doc.text(`Police Station: ${complaintData.policeStation || 'Not specified'}`, 20, 150);
+            doc.text(`Incident Date: ${incidentDate.toLocaleDateString('en-PK')}`, 20, 157);
+            doc.text(`Incident Time: ${complaintData.incidentTime || 'Not specified'}`, 20, 164);
+            doc.text(`Location: ${complaintData.location}`, 20, 171);
+            
+            // Complaint description
+            const descriptionLines = doc.splitTextToSize(`Details: ${complaintData.details}`, 180);
+            doc.text(descriptionLines, 20, 178);
+            
+            // Evidence details
+            if (complaintData.evidence) {
+                const evidenceLines = doc.splitTextToSize(`Evidence: ${complaintData.evidence}`, 180);
+                doc.text(evidenceLines, 20, doc.lastAutoTable.finalY + 10 || 190);
+            }
+            
+            // Suspect information
+            if (complaintData.suspectName || complaintData.suspectCnic) {
+                doc.setFontSize(14);
+                doc.text('3. SUSPECT INFORMATION', 15, doc.lastAutoTable.finalY + 20 || 200);
+                doc.setFontSize(12);
+                
+                if (complaintData.suspectName) {
+                    doc.text(`Name: ${complaintData.suspectName}`, 20, doc.lastAutoTable.finalY + 10 || 210);
+                }
+                if (complaintData.suspectCnic) {
+                    doc.text(`CNIC: ${complaintData.suspectCnic}`, 20, doc.lastAutoTable.finalY + 5 || 215);
+                }
+                if (complaintData.suspectAddress) {
+                    doc.text(`Address: ${complaintData.suspectAddress}`, 20, doc.lastAutoTable.finalY + 5 || 220);
+                }
+                if (complaintData.suspectDetails) {
+                    const suspectLines = doc.splitTextToSize(`Details: ${complaintData.suspectDetails}`, 180);
+                    doc.text(suspectLines, 20, doc.lastAutoTable.finalY + 5 || 225);
+                }
+            }
+            
+            // Status updates
+            doc.setFontSize(14);
+            doc.text('4. STATUS UPDATES', 15, doc.lastAutoTable.finalY + 20 || 240);
+            doc.setFontSize(12);
+            
+            complaintData.statusUpdates.forEach((update, index) => {
+                const updateDate = new Date(update.date);
+                doc.text(`${index + 1}. ${update.status} (${updateDate.toLocaleDateString('en-PK')})`, 20, doc.lastAutoTable.finalY + 10 || 250);
+                
+                const remarksLines = doc.splitTextToSize(`Remarks: ${update.remarks}`, 180);
+                doc.text(remarksLines, 25, doc.lastAutoTable.finalY + 5 || 255);
+            });
+            
+            // Official section
+            doc.setFontSize(14);
+            doc.text('5. OFFICIAL USE ONLY', 15, doc.lastAutoTable.finalY + 20 || 270);
+            doc.setFontSize(12);
+            doc.text(`Assigned Officer: ${complaintData.assignedOfficer || 'To be assigned'}`, 20, doc.lastAutoTable.finalY + 10 || 280);
+            
+            // Add stamp area
+            doc.setTextColor(196, 30, 58);
+            doc.text('[OFFICIAL STAMP]', 140, doc.lastAutoTable.finalY + 10 || 290);
+            doc.text('CPLC Sindh', 140, doc.lastAutoTable.finalY + 5 || 295);
+            doc.text(`Date: ${regDate.toLocaleDateString('en-PK')}`, 140, doc.lastAutoTable.finalY + 5 || 300);
+            
+            // Footer note
+            doc.setFontSize(10);
+            doc.text('NOTE: This is computer generated complaint form. Contact CPLC office for official copy.', 105, 285, { align: 'center' });
+            
+            // Save the PDF
+            doc.save(`CPLC_Complaint_${complaintData.complaintNumber}.pdf`);
+        }
+
+        // Format complaint type for display
+        function formatComplaintType(type) {
+            const types = {
+                'crime-report': 'Crime Report',
+                'police-misconduct': 'Police Misconduct',
+                'traffic-violation': 'Traffic Violation',
+                'cyber-crime': 'Cyber Crime',
+                'missing-person': 'Missing Person',
+                'other': 'Other'
+            };
+            return types[type] || type;
+        }
+
+        // Clean old data (older than 4 months)
+        function cleanOldData() {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - DATA_RETENTION_DAYS);
+            
+            cplcComplaints = cplcComplaints.filter(complaint => {
+                const complaintDate = new Date(complaint.registrationDate);
+                return complaintDate >= cutoffDate;
+            });
+            
+            localStorage.setItem(CPLC_STORAGE_KEY, JSON.stringify(cplcComplaints));
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
